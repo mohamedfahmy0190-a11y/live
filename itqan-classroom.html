@@ -84,6 +84,23 @@ body[data-role=s] #wclr{display:none}
 #tb .sw{border-radius:50%;width:26px;height:26px;border:2px solid #ffffff55}
 #tb .sw.on{outline:3px solid #7c6cf6}
 #tb .sp{width:1px;height:24px;background:#3a3d52;margin:0 3px}
+body:not([data-role=t]) #aib{display:none}
+#aip{position:fixed;inset:0;z-index:40;background:#000b;display:flex;align-items:center;justify-content:center;padding:12px}
+#aip[hidden]{display:none}
+.aic{background:var(--side);border-radius:20px;padding:16px;width:min(680px,100%);max-height:94vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.aih{display:flex;justify-content:space-between;align-items:center;font-size:17px}
+.aih button{background:#2c2f3e;border-radius:10px;width:34px;height:34px}
+.ais{background:#1d2030;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.ais h4{font-size:14px;color:#b9b0ff}
+.ais label{margin-inline-end:12px;font-size:13px}
+.aic input[type=text],.aic input[type=password],.aic input:not([type]),.aic select,.aic textarea{background:#12141f;border:1px solid #2c2f3e;border-radius:10px;padding:9px;color:#fff;font-family:inherit;width:100%;outline:0}
+.aic textarea{min-height:90px;resize:vertical}
+.aic #ai_out{min-height:200px}
+.aic .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.aic .row button,.aic .go{background:var(--p);border-radius:10px;padding:8px 14px;font-weight:600}
+.aic .go{background:#1f9d55;padding:11px}
+.aic .go:disabled{opacity:.5}
+.aic small{color:#8a8ea5}
 @media(max-width:860px){#app{grid-template-columns:1fr;height:auto}#side{height:480px}}
 </style>
 </head>
@@ -97,6 +114,7 @@ body[data-role=s] #wclr{display:none}
   <div class="row"><button onclick="join('t')">دخول كمعلم</button><button onclick="join('s')">دخول كطالب</button></div>
   <button class="w" onclick="pop()">↗ فتح في نافذة مستقلة بكامل الصلاحيات</button>
   <small>داخل مواقع جوجل تُمنع الكاميرا والميكروفون ومشاركة الشاشة — استخدم النافذة المستقلة.</small>
+  <small id="ver" style="opacity:.6"></small>
  </div>
 </div>
 
@@ -107,6 +125,7 @@ body[data-role=s] #wclr{display:none}
   <div class="top">
    <div><span class="badge live"><i></i>مباشر</span><span>حصة مباشرة</span></div>
    <button class="pop" onclick="pop()">↗ فتح في نافذة مستقلة بكامل الصلاحيات</button>
+   <button class="pop" id="aib" onclick="aiOpen()">🤖 ملخص الحصة</button>
    <div><span class="badge gray">👥 <span id="cnt">0</span></span><span class="badge green" id="vb">〰 صوت</span></div>
   </div>
   <div id="stage">
@@ -144,10 +163,30 @@ body[data-role=s] #wclr{display:none}
  </div>
 </div>
 
+<div id="aip" hidden><div class="aic">
+ <div class="aih"><b>🤖 ملخص الحصة بالذكاء الاصطناعي</b><button onclick="aiClose()">✕</button></div>
+ <div class="ais"><h4>1) مصادر الملخص</h4>
+  <div><label><input type="checkbox" id="ai_chat" checked> الشات</label><label><input type="checkbox" id="ai_att" checked> الحضور</label><label><input type="checkbox" id="ai_tr" checked> التفريغ الصوتي</label></div>
+  <div class="row"><button id="ai_sr" onclick="srToggle()">🎙 بدء التفريغ الصوتي</button>
+   <select id="ai_lang" style="width:auto"><option value="ar-EG">عربي (مصر)</option><option value="ar-SA">عربي (السعودية)</option><option value="en-US">English</option></select><small id="ai_trc"></small></div>
+  <small>التفريغ الصوتي يسجّل كلامك أنت فقط (ميكروفون المعلم) ويعمل في Chrome وEdge على الكمبيوتر.</small>
+  <textarea id="ai_notes" placeholder="ملاحظات إضافية أو نص الحصة (اختياري)"></textarea></div>
+ <div class="ais"><h4>2) خدمة الذكاء الاصطناعي</h4>
+  <select id="ai_prov" onchange="aiProv()"><option value="gemini">Google Gemini (مفتاح مجاني من AI Studio)</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic Claude</option><option value="webhook">سكريبت خاص (رابط Webhook)</option></select>
+  <input type="password" id="ai_key" placeholder="مفتاح API" dir="ltr" autocomplete="off">
+  <input id="ai_model" placeholder="اسم النموذج" dir="ltr">
+  <input id="ai_url" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
+  <small>المفتاح يُحفظ في متصفحك أنت فقط ولا يُرسل إلا للخدمة التي تختارها. بيانات الحصة (الشات والتفريغ) ستُرسل لهذه الخدمة، فأخبر الطلاب بذلك.</small></div>
+ <div class="row"><button class="go" id="ai_go" onclick="aiRun()">✨ إنشاء الملخص</button><small id="ai_st"></small></div>
+ <textarea id="ai_out" placeholder="سيظهر الملخص هنا..."></textarea>
+ <div class="row"><button onclick="aiCopy()">📋 نسخ</button><button onclick="aiDl()">⬇ تنزيل</button><button onclick="aiShare()">💬 إرسال للطلاب في الشات</button></div>
+</div></div>
 <div id="fl"><div id="tb" hidden></div></div>
 <script>
 const SRC='<!doctype html>'+document.documentElement.outerHTML;
 const $=s=>document.querySelector(s);
+const VER='2026.10.19-e';
+$('#ver').textContent='الإصدار '+VER;
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]};
 const MC={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
 function meter(t){try{const ac=new(window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser(),b=$('#vb'),d=new Uint8Array(an.fftSize);
@@ -181,7 +220,7 @@ function join(r){
  const rn=$('#room').value.trim()||'main';room=rn.toLowerCase().replace(/[^\w-]/g,c=>'_'+c.charCodeAt(0).toString(16));
  role=r;document.body.dataset.role=r;A.src=SIL;A.play().catch(()=>{});$('#join').hidden=true;
  if(r=='t'){$('#v').muted=true;buildTb();initT()}else initS();
- render();ui();sys('الغرفة: '+rn+(role=='t'?' — شارك هذا الرمز مع الطلاب':''));
+ render();ui();if(role=='t')LOG.start=Date.now();sys('الغرفة: '+rn+(role=='t'?' — شارك هذا الرمز مع الطلاب':'')+' • الإصدار '+VER);
 }
 const bc=o=>Object.values(conns).filter(x=>x.adm).forEach(x=>{try{x.c.send(o)}catch(e){}});
 const bst=()=>bc({t:'st',st});
@@ -195,11 +234,11 @@ async function initT(){
  peer.on('error',e=>sys(e.type=='unavailable-id'?'هذه الغرفة مفتوحة بالفعل عند معلم آخر — غيّر الرمز':'خطأ في الاتصال: '+e.type));
  peer.on('connection',c=>{
   c.on('data',d=>tData(c,d));
-  c.on('close',()=>{const o=conns[c.peer];delete conns[c.peer];o&&dropMic(o);hands.delete(c.peer);hideCam('s:'+c.peer);roster2()});
+  c.on('close',()=>{const o=conns[c.peer];delete conns[c.peer];o&&dropMic(o);o&&o.adm&&LOG.att.push({ts:Date.now(),n:o.name,ev:'خرج'});hands.delete(c.peer);hideCam('s:'+c.peer);roster2()});
  });
  peer.on('call',c=>{c.answer();
   if(c.metadata&&c.metadata.k=='cam'){
-   c.on('stream',s=>{const o=conns[c.peer];if(!o||!o.adm||!o.cp){c.close();return}o.sc=c;showCam('s:'+c.peer,s,o.name)});
+   c.on('stream',s=>{const o=conns[c.peer];if(!o||!o.adm||!o.cp){c.close();return}o.sc=c;if(!boxes['s:'+c.peer])sys('📷 '+o.name+' فتح الكاميرا');showCam('s:'+c.peer,s,o.name)});
    c.on('close',()=>hideCam('s:'+c.peer));return}
   c.on('stream',s=>{const o=conns[c.peer];if(!o||!o.adm||!o.can)return;const t=s.getAudioTracks()[0];if(!t)return;
    const a=new Audio();a.srcObject=s;a.play().catch(()=>{});o.au=a;if(o.mt)stream.removeTrack(o.mt);o.mt=t;stream.addTrack(t);refresh()});
@@ -215,14 +254,14 @@ function tData(c,d){
   if(gm==1)admit(c.peer);else{c.send({t:'wait'});sys('⏳ '+o.name+' ينتظر الدخول — افتح تبويب «الطلاب» للقبول');render()}
   return}
  const o=conns[c.peer];if(!o||!o.adm)return;
- if(d.t=='chat'){if(st.lock)return;const m={n:o.name,m:String(d.m).slice(0,500)};chat.push(m);bc({t:'chat',...m});render()}
+ if(d.t=='chat'){if(st.lock)return;const m={n:o.name,m:String(d.m).slice(0,500),ts:Date.now()};chat.push(m);bc({t:'chat',...m});render()}
  else if(d.t=='hand'){d.on?hands.add(c.peer):hands.delete(c.peer);roster2()}
  else if(d.t=='vote'&&poll){poll.v[c.peer]=d.v}
 }
 function admit(k){const o=conns[k];if(!o||o.adm)return;o.adm=1;o.can=allMuted?0:1;o.cp=camBanAll?0:1;
- o.c.send({t:'init',chat:chat.filter(x=>!x.sys),st,strokes,ins});if(!o.can)o.c.send({t:'mic',on:0});callOne(o);callCam(o);if(!o.cp)o.c.send({t:'cam',on:0});roster2()}
+ o.c.send({t:'init',chat:chat.filter(x=>!x.sys),st,strokes,ins});if(!o.can)o.c.send({t:'mic',on:0});LOG.att.push({ts:Date.now(),n:o.name,ev:'دخل'});callOne(o);callCam(o);if(!o.cp)o.c.send({t:'cam',on:0});roster2()}
 function admitAll(){Object.keys(conns).forEach(admit)}
-function deny(k,kick){const o=conns[k];if(!o)return;try{o.c.send({t:kick?'kicked':'denied'})}catch(e){}dropMic(o);delete conns[k];hands.delete(k);hideCam('s:'+k);setTimeout(()=>{try{o.c.close()}catch(e){}},300);roster2()}
+function deny(k,kick){const o=conns[k];if(!o)return;if(o.adm)LOG.att.push({ts:Date.now(),n:o.name,ev:kick?'طُرد':'خرج'});try{o.c.send({t:kick?'kicked':'denied'})}catch(e){}dropMic(o);delete conns[k];hands.delete(k);hideCam('s:'+k);setTimeout(()=>{try{o.c.close()}catch(e){}},300);roster2()}
 function camAllow(k){const o=conns[k];if(!o||!o.adm)return;o.cp=o.cp?0:1;o.c.send({t:'cam',on:o.cp});if(!o.cp){try{o.sc&&o.sc.close()}catch(e){}hideCam('s:'+k)}render()}
 function tCamBan(){camBanAll=camBanAll?0:1;Object.values(conns).filter(o=>o.adm).forEach(o=>{o.cp=camBanAll?0:1;o.c.send({t:'cam',on:o.cp});if(!o.cp){try{o.sc&&o.sc.close()}catch(e){}hideCam('s:'+o.c.peer)}});render();sys(camBanAll?'تم منع كاميرات الطلاب':'تم السماح بكاميرات الطلاب')}
 function cycleGm(){gm=(gm+1)%3;if(gm==1)admitAll();sys('وضع الدخول: '+['بموافقة المعلم','تلقائي','مقفلة (لا يدخل أحد)'][gm]);render()}
@@ -239,6 +278,7 @@ function dropMic(o){let ch=0;if(o.mt){stream.removeTrack(o.mt);o.mt=null;ch=1}if
 function allow(k){const o=conns[k];if(!o)return;o.can=o.can?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o);render()}
 function tMuteAll(){allMuted=allMuted?0:1;Object.values(conns).filter(o=>o.adm).forEach(o=>{o.can=allMuted?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o)});ui();render();sys(allMuted?'تم كتم صوت جميع الطلاب':'تم إلغاء كتم الطلاب')}
 function mic(){role=='t'?tMic():sMic()}
+function watchCall(c,w){setTimeout(()=>{try{const q=c.peerConnection&&c.peerConnection.iceConnectionState;if(q&&q!='connected'&&q!='completed')sys('⚠️ تعذر وصول '+w+' للمعلم (حالة الاتصال: '+q+') — جرّب شبكة أخرى، أو افتح الرابط مباشرة في Chrome/Safari')}catch(e){}},10000)}
 function cam(){role=='t'?tCam():sCam()}
 async function sCam(){
  if(camS)return stopCam();
@@ -246,7 +286,7 @@ async function sCam(){
  let t;try{t=(await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},frameRate:{ideal:15}}})).getVideoTracks()[0]}catch(e){return micErr(e,'الكاميرا')}
  if(!canCam||camS){t.stop();return}
  camS=t;camCall=peer.call('itqan-'+room,new MediaStream([t]),{metadata:{k:'cam'}});setTimeout(()=>tuneCall(camCall,3e5,'balanced'),1200);
- showCam('me',new MediaStream([t]),'أنت',1);ui()}
+ watchCall(camCall,'الكاميرا');showCam('me',new MediaStream([t]),'أنت',1);sys('📷 تم تشغيل الكاميرا وإرسالها للمعلم');ui()}
 function stopCam(){if(camS){camS.stop();camS=null}if(camCall){try{camCall.close()}catch(e){}camCall=null}hideCam('me');ui()}
 async function sMic(){
  if(!canTalk)return alert('كتم المعلم ميكروفونك');
@@ -356,6 +396,7 @@ function sync(){
  clearTimeout(rt);stopMic();stopCam();canTalk=1;canCam=1;try{peer.destroy()}catch(e){}initS();sys('جارٍ إعادة الاتصال...');
 }
 function endCall(){
+ if(role=='t'&&!aiAsked&&(chat.some(x=>!x.sys)||LOG.tr.length)){aiAsked=1;if(confirm('هل تريد إنشاء ملخص الحصة بالذكاء الاصطناعي قبل الإغلاق؟')){aiOpen();return}}
  if(!confirm(role=='t'?'إنهاء الحصة للجميع؟':'مغادرة الحصة؟'))return;
  try{stream.getTracks().forEach(t=>t.stop());peer.destroy()}catch(e){}
  location.reload();
@@ -364,7 +405,7 @@ function endCall(){
 /* ---------- الشات والواجهة ---------- */
 function send(){
  const i=$('#ci'),m=i.value.trim();if(!m)return;
- if(role=='t'){const o={n:name+' (المعلم)',m};chat.push(o);bc({t:'chat',...o});render()}
+ if(role=='t'){const o={n:name+' (المعلم)',m,ts:Date.now()};chat.push(o);bc({t:'chat',...o});render()}
  else{if(st.lock||!conn||!conn.open)return;conn.send({t:'chat',n:name,m})}
  i.value='';
 }
@@ -558,6 +599,56 @@ function layoutCams(){const big=isBigT();$('#cv').style.display=big?'block':'non
 function relayout(){layoutCams();if(FE.tb&&!$('#tb').hidden)place($('#tb'),'tb')}
 addEventListener('resize',relayout);
 document.addEventListener('fullscreenchange',()=>{(document.fullscreenElement||document.body).appendChild($('#fl'));setTimeout(relayout,150)});
+/* ---------- ملحق ملخص الحصة بالذكاء الاصطناعي ---------- */
+const AIDEF={gemini:'gemini-2.5-flash',openai:'gpt-4o-mini',anthropic:'claude-haiku-5-5',webhook:''};
+const LOG={start:0,att:[],tr:[]};let sr=null,srOn=0,aiAsked=0;
+const aiSt=(m,e)=>{const x=$('#ai_st');x.textContent=m;x.style.color=e?'#ff8a8a':''};
+function aiLoad(){try{return JSON.parse(localStorage.getItem('itqan_ai')||'{}')}catch(e){return{}}}
+function aiSave(){try{localStorage.setItem('itqan_ai',JSON.stringify({provider:$('#ai_prov').value,key:$('#ai_key').value,model:$('#ai_model').value,url:$('#ai_url').value,lang:$('#ai_lang').value}))}catch(e){}}
+function aiOpen(){const c=aiLoad();if(c.provider)$('#ai_prov').value=c.provider;$('#ai_key').value=c.key||'';$('#ai_model').value=c.model||'';$('#ai_url').value=c.url||'';if(c.lang)$('#ai_lang').value=c.lang;aiProv(1);$('#aip').hidden=false;aiUi()}
+function aiClose(){aiSave();$('#aip').hidden=true}
+function aiProv(keep){const p=$('#ai_prov').value,m=$('#ai_model'),w=p=='webhook';
+ if(!keep&&(!m.value||Object.values(AIDEF).includes(m.value)))m.value=AIDEF[p];if(keep&&!m.value)m.value=AIDEF[p];
+ $('#ai_key').hidden=w;m.hidden=w;$('#ai_url').hidden=!w}
+function aiUi(){$('#ai_trc').textContent=LOG.tr.length?LOG.tr.length+' مقطع مفرَّغ':'';$('#ai_sr').textContent=srOn?'⏹ إيقاف التفريغ الصوتي':'🎙 بدء التفريغ الصوتي'}
+function srToggle(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR)return aiSt('هذا المتصفح لا يدعم التفريغ الصوتي — استخدم Chrome أو Edge على الكمبيوتر، أو اكتب ملاحظاتك في الخانة',1);
+ if(srOn){srOn=0;try{sr.stop()}catch(e){}aiUi();return}
+ sr=new SR();sr.lang=$('#ai_lang').value;sr.continuous=true;sr.interimResults=false;
+ sr.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal){const t=e.results[i][0].transcript.trim();if(t){LOG.tr.push({ts:Date.now(),t});aiUi()}}};
+ sr.onend=()=>{if(srOn)setTimeout(()=>{try{sr.start()}catch(e){}},300)};
+ sr.onerror=e=>{if(e.error=='not-allowed'||e.error=='service-not-allowed'){srOn=0;aiSt('لم يُسمح بالتفريغ الصوتي — اسمح بالميكروفون للموقع',1);aiUi()}};
+ srOn=1;try{sr.start()}catch(e){}aiSt('');aiUi()}
+function aiData(){const fm=t=>new Date(t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+ return{title:'حصة '+room,date:new Date(LOG.start||Date.now()).toLocaleDateString('ar-EG'),minutes:Math.round((Date.now()-(LOG.start||Date.now()))/60000),teacher:name,
+  attendance:$('#ai_att').checked?LOG.att.map(a=>fm(a.ts)+' — '+a.n+' '+a.ev):[],
+  chat:$('#ai_chat').checked?chat.filter(x=>!x.sys).map(x=>(x.ts?fm(x.ts)+' ':'')+x.n+': '+x.m):[],
+  polls:chat.filter(x=>x.sys&&String(x.m).startsWith('نتيجة الاستفتاء')).map(x=>x.m),
+  transcript:$('#ai_tr').checked?LOG.tr.map(x=>fm(x.ts)+' '+x.t):[],notes:$('#ai_notes').value.trim()}}
+function aiPrompt(d){const cut=(a,n)=>a.join('\n').slice(-n);
+ return 'أنت مساعد تعليمي. لخّص الحصة الدراسية التالية بالعربية الفصحى المبسطة بصيغة منظمة تتضمن: عنوان الحصة، ملخص قصير (3 إلى 5 أسطر)، النقاط والمفاهيم الرئيسية، الأمثلة أو التمارين التي نُوقشت، أسئلة الطلاب وإجاباتها، الواجبات أو المهام المطلوبة، وتوصيات للمعلم للحصة القادمة. اعتمد فقط على المعلومات الواردة، ولا تخترع معلومات غير موجودة، وإن كان قسم بلا بيانات فاكتب «لا يوجد».\n\n'+
+ 'المعلم: '+d.teacher+'\nالتاريخ: '+d.date+'\nالمدة التقريبية: '+d.minutes+' دقيقة\n\n'+
+ '## الحضور\n'+(cut(d.attendance,4000)||'لا يوجد')+'\n\n## نص كلام المعلم (تفريغ صوتي)\n'+(cut(d.transcript,60000)||'لا يوجد')+'\n\n## رسائل الشات\n'+(cut(d.chat,20000)||'لا يوجد')+'\n\n## نتائج الاستفتاءات\n'+(cut(d.polls,3000)||'لا يوجد')+'\n\n## ملاحظات المعلم\n'+(d.notes||'لا يوجد')}
+async function aiHttp(url,opt){const r=await fetch(url,opt),t=await r.text();if(!r.ok)throw new Error('HTTP '+r.status+' '+t.slice(0,160));let j=null;try{j=JSON.parse(t)}catch(e){}return{t,j}}
+async function aiCall(p,key,model,url,d){const prompt=aiPrompt(d);
+ if(p=='webhook'){const o=await aiHttp(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...d,prompt})});return o.j&&(o.j.summary||o.j.text||o.j.result)||o.t}
+ if(p=='gemini'){const o=await aiHttp('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  return o.j.candidates[0].content.parts.map(x=>x.text||'').join('')}
+ if(p=='openai'){const o=await aiHttp('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'user',content:prompt}]})});return o.j.choices[0].message.content}
+ const o=await aiHttp('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+ return o.j.content.map(x=>x.text||'').join('')}
+async function aiRun(){aiSave();const d=aiData();
+ if(!d.chat.length&&!d.transcript.length&&!d.notes&&!d.attendance.length)return aiSt('لا توجد بيانات للتلخيص بعد — شغّل التفريغ الصوتي أو اكتب ملاحظات',1);
+ const p=$('#ai_prov').value,key=$('#ai_key').value.trim(),model=$('#ai_model').value.trim(),url=$('#ai_url').value.trim();
+ if(p=='webhook'){if(!/^https:\/\//.test(url))return aiSt('أدخل رابط السكريبت (يبدأ بـ https)',1)}else if(!key)return aiSt('أدخل مفتاح API',1);
+ else if(!model)return aiSt('أدخل اسم النموذج',1);
+ $('#ai_go').disabled=true;aiSt('جارٍ إنشاء الملخص...');
+ try{const t=await aiCall(p,key,model,url,d);$('#ai_out').value=String(t).trim();aiSt('تم ✓')}catch(e){aiSt('تعذر إنشاء الملخص: '+e.message,1)}
+ $('#ai_go').disabled=false}
+function aiCopy(){const o=$('#ai_out');o.select();try{navigator.clipboard.writeText(o.value)}catch(e){document.execCommand('copy')}aiSt('تم النسخ ✓')}
+function aiDl(){const v=$('#ai_out').value;if(!v)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+v],{type:'text/plain;charset=utf-8'}));a.download='class-summary-'+room+'-'+new Date().toISOString().slice(0,10)+'.txt';a.click()}
+function aiShare(){const v=$('#ai_out').value.trim();if(!v)return;const parts=('📝 ملخص الحصة:\n'+v).match(/[\s\S]{1,450}/g).slice(0,8);
+ parts.forEach(m=>{const o={n:name+' (المعلم)',m,ts:Date.now()};chat.push(o);bc({t:'chat',...o})});render();aiSt('أُرسل للطلاب ✓')}
 function insTog(k){ins[k].on=ins[k].on?0:1;if(ins[k].on)tool='mv';refTb();sendIns();redraw()}
 </script>
 </body>
