@@ -1,22 +1,656 @@
-async function join(r){
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Itqan Academy – الفصل الافتراضي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#0c0e16;--side:#151722;--vid:#2a2c38;--p:#6c5ce7;--p2:#7c6cf6;--r:16px}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:#e8e9f0;font-family:Cairo,Tahoma,sans-serif;padding:12px;font-size:14px}
+button{font-family:inherit;cursor:pointer;border:0;color:#fff}
+#app{display:grid;grid-template-columns:1fr 340px;gap:12px;height:100%;min-height:560px}
+.col{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.top>div{display:flex;gap:8px;align-items:center}
+.badge{border-radius:999px;padding:5px 12px;font-weight:600;display:flex;gap:6px;align-items:center;font-size:13px}
+.live{background:#e5303c}.live i{width:9px;height:9px;border-radius:50%;background:#fff;animation:pl 1.2s infinite}
+@keyframes pl{50%{opacity:.25;transform:scale(.7)}}
+.gray{background:#2c2f3e}.green{background:#14532d;color:#86efac}
+.pop{background:#1d2030;color:#c9ccdd;border-radius:999px;padding:5px 12px;font-size:12px}
+#stage{position:relative;flex:1;min-height:300px;background:var(--vid);border-radius:20px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#v{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#av{position:relative;z-index:1;text-align:center}
+#av b{display:flex;width:130px;height:130px;border-radius:50%;background:#5b2c50;color:#f4a6d7;font-size:64px;align-items:center;justify-content:center;margin:0 auto 14px}
+#av span{color:#c9ccdd}
+#wb{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair}
+#wb.bg{background:#fff}
+body[data-role=s] #wb{pointer-events:none}
+#wclr{position:absolute;z-index:4;top:12px;right:12px;background:#3a3d52;border-radius:12px;padding:6px 12px}
+#fs{position:absolute;z-index:4;top:12px;left:12px;background:rgba(0,0,0,.5);border-radius:12px;width:38px;height:38px;font-size:18px}
+#tag{position:absolute;z-index:4;bottom:12px;right:12px;background:rgba(10,11,18,.78);border-radius:999px;padding:5px 14px;font-size:13px}
+#poll{position:absolute;z-index:5;inset:auto 16px 16px 16px;background:#151722ee;border:1px solid var(--p);border-radius:var(--r);padding:14px;text-align:center}
+#poll button{margin:8px 4px 0;background:var(--p2);border-radius:12px;padding:8px 18px}
+.bar{display:flex;justify-content:center;gap:14px;padding:6px}
+.c{width:48px;height:48px;border-radius:50%;font-size:20px;background:#2c2f3e;display:flex;align-items:center;justify-content:center}
+.c.off{background:#7a1f2b}.c.end{background:#e11d2e}.c.on{outline:2px solid #fff}
+#side{background:var(--side);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.tools{display:flex;justify-content:space-between}
+.tools .c{width:44px;height:44px;font-size:18px}
+.tr{background:#e5484d}.tp{background:var(--p)}.tg{background:#1f9d55}.tz{background:#4a4d5e}
+body[data-role=s] .tools{display:none}
+body[data-role=s] .tonly{opacity:.3;pointer-events:none}
+body[data-role=t] #wb{cursor:crosshair}
+body[data-role=s] #wclr{display:none}
+.tabs{display:flex;gap:6px}
+.tabs button{flex:1;background:#1d2030;color:#aab;border-radius:12px;padding:8px 2px;font-size:13px;border:1.5px solid transparent}
+.tabs button.a{border-color:var(--p);color:#fff}
+#list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:0;padding:2px}
+.m{background:#1d2030;border-radius:14px;padding:8px 12px;line-height:1.6;word-break:break-word}
+.m b{color:#b9b0ff;margin-inline-end:6px}.m.s{background:none;color:#8a8ea5;text-align:center;font-size:12px}
+.inp{display:flex;gap:8px}
+.inp input{flex:1;background:#1d2030;border:1px solid #2c2f3e;border-radius:999px;padding:10px 16px;color:#fff;font-family:inherit;outline:0}
+.inp input:focus{border-color:var(--p)}
+.inp button{width:44px;height:44px;border-radius:50%;background:var(--p2);font-size:18px}
+#join{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#join[hidden]{display:none}
+#gate{position:fixed;inset:0;z-index:45;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#gate[hidden]{display:none}
+.card{background:var(--side);padding:26px;border-radius:22px;width:min(380px,92vw);display:flex;flex-direction:column;gap:12px;text-align:center}
+.card h2{font-size:22px}.card input{background:#1d2030;border:1px solid #2c2f3e;border-radius:12px;padding:11px;color:#fff;font-family:inherit;text-align:center;outline:0}
+.card .row{display:flex;gap:8px}.card .row button{flex:1;padding:11px;border-radius:12px;background:var(--p);font-weight:700}
+.card .row button+button{background:#1f9d55}
+.card .w{background:#2c2f3e;border-radius:12px;padding:9px}
+.card small{color:#8a8ea5}
+#v.pip{inset:auto auto 52px 12px;width:240px;height:135px;z-index:3;border-radius:14px;border:2px solid #ffffff55;object-fit:cover}
+#tb{position:absolute;top:0;left:0;display:flex;flex-wrap:wrap;gap:4px;background:#151722f2;border-radius:14px;padding:6px;align-items:center;max-width:min(760px,96vw);box-shadow:0 8px 28px #000a}
+#fl{position:fixed;inset:0;z-index:30;pointer-events:none}
+#fl>*{pointer-events:auto}
+#tb .grip{width:26px;cursor:grab;background:#3a3d52;touch-action:none;font-size:18px}
+.cb{position:absolute;width:180px;height:101px;border-radius:12px;overflow:hidden;border:2px solid #ffffff66;background:#000;box-shadow:0 6px 20px #000a;cursor:grab;touch-action:none;user-select:none}
+.cb[hidden]{display:none}
+.cb video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.cb span{position:absolute;bottom:3px;right:6px;font-size:11px;background:#000a;padding:1px 7px;border-radius:8px;pointer-events:none}
+.cb button{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:7px;background:#000a;font-size:12px;padding:0}
+#cv{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:1}
+#cvb{position:absolute;z-index:4;top:12px;left:58px;background:rgba(0,0,0,.55);border-radius:12px;width:38px;height:38px;font-size:18px}
+#cvb[hidden]{display:none}
+#tb[hidden]{display:none}
+#tb button{width:34px;height:34px;border-radius:9px;background:#2c2f3e;font-size:16px;padding:0;display:flex;align-items:center;justify-content:center}
+#tb button.on{outline:2px solid #7c6cf6;background:#3b3f5a}
+#tb .sw{border-radius:50%;width:26px;height:26px;border:2px solid #ffffff55}
+#tb .sw.on{outline:3px solid #7c6cf6}
+#tb .sp{width:1px;height:24px;background:#3a3d52;margin:0 3px}
+body:not([data-role=t]) #aib{display:none}
+#aip{position:fixed;inset:0;z-index:40;background:#000b;display:flex;align-items:center;justify-content:center;padding:12px}
+#aip[hidden]{display:none}
+.aic{background:var(--side);border-radius:20px;padding:16px;width:min(680px,100%);max-height:94vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.aih{display:flex;justify-content:space-between;align-items:center;font-size:17px}
+.aih button{background:#2c2f3e;border-radius:10px;width:34px;height:34px}
+.ais{background:#1d2030;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.ais h4{font-size:14px;color:#b9b0ff}
+.ais label{margin-inline-end:12px;font-size:13px}
+.aic input[type=text],.aic input[type=password],.aic input:not([type]),.aic select,.aic textarea{background:#12141f;border:1px solid #2c2f3e;border-radius:10px;padding:9px;color:#fff;font-family:inherit;width:100%;outline:0}
+.aic textarea{min-height:90px;resize:vertical}
+.aic #ai_out{min-height:200px}
+.aic .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.aic .row button,.aic .go{background:var(--p);border-radius:10px;padding:8px 14px;font-weight:600}
+.aic .go{background:#1f9d55;padding:11px}
+.aic .go:disabled{opacity:.5}
+.aic small{color:#8a8ea5}
+@media(max-width:860px){#app{grid-template-columns:1fr;height:auto}#side{height:480px}}
+</style>
+</head>
+<body data-role="">
+<div id="join">
+ <div class="card">
+  <h2>🎓 Itqan Academy</h2>
+  <small>غرفة فصل افتراضي — بث مباشر مجاني</small>
+  <input id="nm" placeholder="اسمك">
+  <input id="room" placeholder="رمز الغرفة (مثال: class1)">
+  <div class="row"><button onclick="join('t')">دخول كمعلم</button><button onclick="join('s')">دخول كطالب</button></div>
+  <button class="w" onclick="pop()">↗ فتح في نافذة مستقلة بكامل الصلاحيات</button>
+  <small>داخل مواقع جوجل تُمنع الكاميرا والميكروفون ومشاركة الشاشة — استخدم النافذة المستقلة.</small>
+  <small id="ver" style="opacity:.6"></small>
+ </div>
+</div>
+
+<div id="gate" hidden><div class="card"><h2 id="gi"></h2><p id="gt" style="line-height:1.9"></p><button class="w" id="gb" hidden onclick="location.reload()">رجوع</button></div></div>
+
+<div id="app">
+ <div class="col">
+  <div class="top">
+   <div><span class="badge live"><i></i>مباشر</span><span>حصة مباشرة</span></div>
+   <button class="pop" onclick="pop()">↗ فتح في نافذة مستقلة بكامل الصلاحيات</button>
+   <button class="pop" id="aib" onclick="aiOpen()">🤖 ملخص الحصة</button>
+   <div><span class="badge gray">👥 <span id="cnt">0</span></span><span class="badge green" id="vb">〰 صوت</span></div>
+  </div>
+  <div id="stage">
+   <video id="v" autoplay playsinline></video>
+   <div id="av"><b>I</b><span id="avt">الكاميرا مقفولة — الصوت شغّال</span></div>
+   <canvas id="wb" hidden></canvas>
+   <video id="cv" autoplay playsinline muted style="display:none"></video>
+   <button id="cvb" hidden onclick="camMode('T')" title="تصغير الكاميرا">⤡</button>
+   <button id="fs" onclick="$('#stage').requestFullscreen&&$('#stage').requestFullscreen()" title="ملء الشاشة">⛶</button>
+   <div id="tag">Itqan Academy 🎤</div>
+   <button id="unm" hidden onclick="A.play();$('#v').play();this.hidden=true" style="position:absolute;z-index:6;top:60px;left:50%;transform:translateX(-50%);background:#6c5ce7;border-radius:12px;padding:10px 18px">🔊 اضغط لتفعيل الصوت</button>
+   <div id="poll" hidden></div>
+  </div>
+  <div class="bar">
+   <button class="c" id="bm" onclick="mic()" title="الميكروفون">🎤</button>
+   <button class="c off" id="bc" onclick="cam()" title="الكاميرا">📷</button>
+   <button class="c tonly" id="bs" onclick="tScr()" title="مشاركة الشاشة">🖥</button>
+   <button class="c" id="bh" onclick="hand()" title="رفع اليد">✋</button>
+   <button class="c end" onclick="endCall()" title="إنهاء">📞</button>
+  </div>
+ </div>
+ <div id="side">
+  <div class="tools">
+   <button class="c tr" id="tl" onclick="tMuteAll()" title="كتم صوت جميع الطلاب">🔇</button>
+   <button class="c tr" id="tr" onclick="tRec()" title="تسجيل الحصة">⏺</button>
+   <button class="c tp" id="tp" onclick="tPoll()" title="استفتاء سريع">📊</button>
+   <button class="c tg" id="tw" onclick="tWb()" title="السبورة">🖍</button>
+   <button class="c tz" onclick="sync()" title="تحديث الاتصال">🔄</button>
+  </div>
+  <div class="tabs">
+   <button data-t="chat" class="a">الشات (0)</button><button data-t="stu">الطلاب (0)</button><button data-t="hand">اليد المرفوعة (0)</button>
+  </div>
+  <div id="list"></div>
+  <div class="inp"><input id="ci" placeholder="اكتب للطلاب..." autocomplete="off"><button onclick="send()">➤</button></div>
+ </div>
+</div>
+
+<div id="aip" hidden><div class="aic">
+ <div class="aih"><b>🤖 ملخص الحصة بالذكاء الاصطناعي</b><button onclick="aiClose()">✕</button></div>
+ <div class="ais"><h4>1) مصادر الملخص</h4>
+  <div><label><input type="checkbox" id="ai_chat" checked> الشات</label><label><input type="checkbox" id="ai_att" checked> الحضور</label><label><input type="checkbox" id="ai_tr" checked> التفريغ الصوتي</label></div>
+  <div class="row"><button id="ai_sr" onclick="srToggle()">🎙 بدء التفريغ الصوتي</button>
+   <select id="ai_lang" style="width:auto"><option value="ar-EG">عربي (مصر)</option><option value="ar-SA">عربي (السعودية)</option><option value="en-US">English</option></select><small id="ai_trc"></small></div>
+  <small>التفريغ الصوتي يسجّل كلامك أنت فقط (ميكروفون المعلم) ويعمل في Chrome وEdge على الكمبيوتر.</small>
+  <textarea id="ai_notes" placeholder="ملاحظات إضافية أو نص الحصة (اختياري)"></textarea></div>
+ <div class="ais"><h4>2) خدمة الذكاء الاصطناعي</h4>
+  <select id="ai_prov" onchange="aiProv()"><option value="gemini">Google Gemini (مفتاح مجاني من AI Studio)</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic Claude</option><option value="webhook">سكريبت خاص (رابط Webhook)</option></select>
+  <input type="password" id="ai_key" placeholder="مفتاح API" dir="ltr" autocomplete="off">
+  <input id="ai_model" placeholder="اسم النموذج" dir="ltr">
+  <input id="ai_url" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
+  <small>المفتاح يُحفظ في متصفحك أنت فقط ولا يُرسل إلا للخدمة التي تختارها. بيانات الحصة (الشات والتفريغ) ستُرسل لهذه الخدمة، فأخبر الطلاب بذلك.</small></div>
+ <div class="row"><button class="go" id="ai_go" onclick="aiRun()">✨ إنشاء الملخص</button><small id="ai_st"></small></div>
+ <textarea id="ai_out" placeholder="سيظهر الملخص هنا..."></textarea>
+ <div class="row"><button onclick="aiCopy()">📋 نسخ</button><button onclick="aiDl()">⬇ تنزيل</button><button onclick="aiShare()">💬 إرسال للطلاب في الشات</button></div>
+</div></div>
+<div id="fl"><div id="tb" hidden></div></div>
+<script>
+const SRC='<!doctype html>'+document.documentElement.outerHTML;
+const $=s=>document.querySelector(s);
+const VER='2026.10.19-e';
+$('#ver').textContent='الإصدار '+VER;
+const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]};
+const MC={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
+function meter(t){try{const ac=new(window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser(),b=$('#vb'),d=new Uint8Array(an.fftSize);
+ ac.resume();ac.createMediaStreamSource(new MediaStream([t])).connect(an);
+ const iv=setInterval(()=>{if(t.readyState!='live'){clearInterval(iv);b.style.boxShadow='none';ac.close();return}
+  if(!t.enabled){b.style.boxShadow='none';return}
+  an.getByteTimeDomainData(d);let m=0;d.forEach(x=>m=Math.max(m,Math.abs(x-128)));b.style.boxShadow='0 0 0 '+Math.min(8,Math.round(m/128*40))+'px #22c55e66'},150)}catch(e){}}
+function micErr(e,what){what=what||'الميكروفون';
+ const n=e&&e.name,emb=window!==top,ok=window.isSecureContext&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia,
+ app=/FBAN|FBAV|Instagram|Line\/|WhatsApp|Snapchat|Telegram|GSA|; wv\)/i.test(navigator.userAgent);
+ const w=n=='NotAllowedError'?'رفض المتصفح الإذن':n=='NotFoundError'?'لا يوجد ميكروفون':n=='NotReadableError'?'الميكروفون مستخدم من تطبيق آخر':'غير مدعوم هنا';
+ const h=emb?'الصفحة داخل إطار مدمج — افتح رابط الصفحة مباشرة في Safari/Chrome':location.protocol=='blob:'?'افتح الملف من رابط استضافة https حقيقي بدل النافذة المؤقتة':app?'أنت داخل متصفح تطبيق — افتح الرابط في Safari/Chrome':!ok?'الصفحة ليست على https':'اسمح بالميكروفون من إعدادات الموقع (زر aA في شريط عنوان Safari ← إعدادات الموقع)';
+ sys('تعذر تشغيل '+what+' ('+w+'). '+h+'. ما زال بإمكانك سماع الدرس.')}
+let lastA=-1;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let role,name,room,peer,conn,conns={},chat=[],roster={s:[],h:[]},tab='chat',canTalk=1,micS,myCall,camS,camCall,canCam=1,camBanAll=0,allMuted=0,gm=0,admitted=0,final=0,rt,st={cam:0,scr:0,mic:1,wb:0,bg:1,lock:0},
+ stream=new MediaStream(),camT,micT,scrT,compT,sv,cvv,cc,cctx,hands=new Set(),poll=null,rec=null,strokes=[],myHand=0;
+const dcv=document.createElement('canvas');dcv.width=dcv.height=16;const dx=dcv.getContext('2d');let df=0;
+setInterval(()=>{dx.fillStyle=(df^=1)?'#000':'#020202';dx.fillRect(0,0,16,16)},200);
+const dummy=dcv.captureStream(5).getVideoTracks()[0],A=new Audio(),MOB=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform)),SIL='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
+document.addEventListener('pointerdown',()=>{if(A.srcObject&&A.paused)A.play().then(()=>$('#unm').hidden=true).catch(()=>{})});
+
+{const q=new URLSearchParams(location.search),h=decodeURIComponent(location.hash.slice(1)).replace(/^\/?(room=|r=)?/,''),v=q.get('room')||q.get('r')||h;if(v)$('#room').value=v}
+function pop(){const r=$('#room').value.trim()||'main';
+ const w=window.open(URL.createObjectURL(new Blob([SRC],{type:'text/html'}))+'#'+encodeURIComponent(r),'_blank');
+ if(!w)alert('اسمح بالنوافذ المنبثقة لهذا الموقع ثم أعد المحاولة');}
+
+function join(r){
  if(typeof Peer==='undefined')return alert('تعذر تحميل مكتبة الاتصال — تأكد من الإنترنت');
  name=$('#nm').value.trim()||(r=='t'?'المعلم':'طالب');
  const rn=$('#room').value.trim()||'main';room=rn.toLowerCase().replace(/[^\w-]/g,c=>'_'+c.charCodeAt(0).toString(16));
- role=r;document.body.dataset.role=r;A.src=SIL;A.play().catch(()=>{});
-
- // إذا كان الدخول كطالب، نطلب إذن الميكروفون فوراً قبل الانتقال لواجهة الفصل
- if(r=='s'){
-  try{
-   // طلب إذن الميكروفون إجبارياً لإظهار نافذة المتصفح الشهيرة (Allow / Don't allow)
-   const tempStream = await navigator.mediaDevices.getUserMedia({audio:true});
-   // إذا وافق الطالب، نقوم بإيقاف المسار المؤقت مؤقتاً لحين بدء الاتصال الفعلي لكي لا يتداخل
-   tempStream.getTracks().forEach(t => t.stop());
-  }catch(e){
-   alert('⚠️ تنبيه مهم: يبدو أنك قمت برفض إذن الميكروفون أو أن متصفحك يحظره.\n\nلكي تستطيع التحدث مع المعلم، يرجى السماح للميكروفون من إعدادات المتصفح (أيقونة القفل بجانب الرابط).');
-  }
- }
-
- $('#join').hidden=true;
+ role=r;document.body.dataset.role=r;A.src=SIL;A.play().catch(()=>{});$('#join').hidden=true;
  if(r=='t'){$('#v').muted=true;buildTb();initT()}else initS();
  render();ui();if(role=='t')LOG.start=Date.now();sys('الغرفة: '+rn+(role=='t'?' — شارك هذا الرمز مع الطلاب':'')+' • الإصدار '+VER);
 }
+const bc=o=>Object.values(conns).filter(x=>x.adm).forEach(x=>{try{x.c.send(o)}catch(e){}});
+const bst=()=>bc({t:'st',st});
+function sys(m){chat.push({sys:1,m});render()}
+
+/* ---------- المعلم ---------- */
+async function initT(){
+ try{micT=(await navigator.mediaDevices.getUserMedia(MC)).getAudioTracks()[0];stream.addTrack(micT);meter(micT)}
+ catch(e){st.mic=0;micErr(e)}
+ peer=new Peer('itqan-'+room,{config:ICE});
+ peer.on('error',e=>sys(e.type=='unavailable-id'?'هذه الغرفة مفتوحة بالفعل عند معلم آخر — غيّر الرمز':'خطأ في الاتصال: '+e.type));
+ peer.on('connection',c=>{
+  c.on('data',d=>tData(c,d));
+  c.on('close',()=>{const o=conns[c.peer];delete conns[c.peer];o&&dropMic(o);o&&o.adm&&LOG.att.push({ts:Date.now(),n:o.name,ev:'خرج'});hands.delete(c.peer);hideCam('s:'+c.peer);roster2()});
+ });
+ peer.on('call',c=>{c.answer();
+  if(c.metadata&&c.metadata.k=='cam'){
+   c.on('stream',s=>{const o=conns[c.peer];if(!o||!o.adm||!o.cp){c.close();return}o.sc=c;if(!boxes['s:'+c.peer])sys('📷 '+o.name+' فتح الكاميرا');showCam('s:'+c.peer,s,o.name)});
+   c.on('close',()=>hideCam('s:'+c.peer));return}
+  c.on('stream',s=>{const o=conns[c.peer];if(!o||!o.adm||!o.can)return;const t=s.getAudioTracks()[0];if(!t)return;
+   const a=new Audio();a.srcObject=s;a.play().catch(()=>{});o.au=a;if(o.mt)stream.removeTrack(o.mt);o.mt=t;stream.addTrack(t);refresh()});
+  c.on('close',()=>{const o=conns[c.peer];o&&dropMic(o)});
+ });
+ refresh();
+}
+function tData(c,d){
+ if(d.t=='hello'){
+  if(conns[c.peer])return;
+  if(gm==2){c.send({t:'denied',m:'الغرفة مقفلة حالياً'});setTimeout(()=>{try{c.close()}catch(e){}},300);return}
+  const o=conns[c.peer]={c,name:String(d.n).slice(0,40),can:allMuted?0:1,cp:camBanAll?0:1,adm:0};
+  if(gm==1)admit(c.peer);else{c.send({t:'wait'});sys('⏳ '+o.name+' ينتظر الدخول — افتح تبويب «الطلاب» للقبول');render()}
+  return}
+ const o=conns[c.peer];if(!o||!o.adm)return;
+ if(d.t=='chat'){if(st.lock)return;const m={n:o.name,m:String(d.m).slice(0,500),ts:Date.now()};chat.push(m);bc({t:'chat',...m});render()}
+ else if(d.t=='hand'){d.on?hands.add(c.peer):hands.delete(c.peer);roster2()}
+ else if(d.t=='vote'&&poll){poll.v[c.peer]=d.v}
+}
+function admit(k){const o=conns[k];if(!o||o.adm)return;o.adm=1;o.can=allMuted?0:1;o.cp=camBanAll?0:1;
+ o.c.send({t:'init',chat:chat.filter(x=>!x.sys),st,strokes,ins});if(!o.can)o.c.send({t:'mic',on:0});LOG.att.push({ts:Date.now(),n:o.name,ev:'دخل'});callOne(o);callCam(o);if(!o.cp)o.c.send({t:'cam',on:0});roster2()}
+function admitAll(){Object.keys(conns).forEach(admit)}
+function deny(k,kick){const o=conns[k];if(!o)return;if(o.adm)LOG.att.push({ts:Date.now(),n:o.name,ev:kick?'طُرد':'خرج'});try{o.c.send({t:kick?'kicked':'denied'})}catch(e){}dropMic(o);delete conns[k];hands.delete(k);hideCam('s:'+k);setTimeout(()=>{try{o.c.close()}catch(e){}},300);roster2()}
+function camAllow(k){const o=conns[k];if(!o||!o.adm)return;o.cp=o.cp?0:1;o.c.send({t:'cam',on:o.cp});if(!o.cp){try{o.sc&&o.sc.close()}catch(e){}hideCam('s:'+k)}render()}
+function tCamBan(){camBanAll=camBanAll?0:1;Object.values(conns).filter(o=>o.adm).forEach(o=>{o.cp=camBanAll?0:1;o.c.send({t:'cam',on:o.cp});if(!o.cp){try{o.sc&&o.sc.close()}catch(e){}hideCam('s:'+o.c.peer)}});render();sys(camBanAll?'تم منع كاميرات الطلاب':'تم السماح بكاميرات الطلاب')}
+function cycleGm(){gm=(gm+1)%3;if(gm==1)admitAll();sys('وضع الدخول: '+['بموافقة المعلم','تلقائي','مقفلة (لا يدخل أحد)'][gm]);render()}
+function roster2(){
+ const o=Object.entries(conns).filter(([k,x])=>x.adm);
+ roster={s:o.map(([k,x])=>x.name),h:o.filter(([k])=>hands.has(k)).map(([k,x])=>x.name)};
+ bc({t:'roster',...roster});render();
+}
+function tuneCall(call,br,pref){try{const pc=call&&call.peerConnection;if(!pc)return;pc.getSenders().forEach(se=>{if(!se.track||se.track.kind!='video')return;const q=se.getParameters();if(!q.encodings||!q.encodings.length)q.encodings=[{}];q.encodings[0].maxBitrate=br;q.degradationPreference=pref;se.setParameters(q).catch(()=>{})})}catch(e){}}
+function tune(o){const n=Object.values(conns).filter(x=>x.adm).length;tuneCall(o.call,n<=4?3e6:n<=10?1.8e6:1e6,scrT?'maintain-resolution':'balanced')}
+function callCam(o){try{o.cc&&o.cc.close()}catch(e){}o.cc=null;if(!camT)return;o.cc=peer.call(o.c.peer,new MediaStream([camT]),{metadata:{k:'cam'}});setTimeout(()=>tuneCall(o.cc,4e5,'balanced'),900)}
+function callOne(o){try{o.call&&o.call.close()}catch(e){}o.call=peer.call(o.c.peer,new MediaStream(stream.getTracks().filter(t=>t!==o.mt)));setTimeout(()=>tune(o),900);setTimeout(()=>tune(o),3500)}
+function dropMic(o){let ch=0;if(o.mt){stream.removeTrack(o.mt);o.mt=null;ch=1}if(o.au){o.au.srcObject=null;o.au=null}if(ch)refresh()}
+function allow(k){const o=conns[k];if(!o)return;o.can=o.can?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o);render()}
+function tMuteAll(){allMuted=allMuted?0:1;Object.values(conns).filter(o=>o.adm).forEach(o=>{o.can=allMuted?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o)});ui();render();sys(allMuted?'تم كتم صوت جميع الطلاب':'تم إلغاء كتم الطلاب')}
+function mic(){role=='t'?tMic():sMic()}
+function watchCall(c,w){setTimeout(()=>{try{const q=c.peerConnection&&c.peerConnection.iceConnectionState;if(q&&q!='connected'&&q!='completed')sys('⚠️ تعذر وصول '+w+' للمعلم (حالة الاتصال: '+q+') — جرّب شبكة أخرى، أو افتح الرابط مباشرة في Chrome/Safari')}catch(e){}},10000)}
+function cam(){role=='t'?tCam():sCam()}
+async function sCam(){
+ if(camS)return stopCam();
+ if(!canCam)return alert('أوقف المعلم كاميرات الطلاب حالياً');
+ let t;try{t=(await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},frameRate:{ideal:15}}})).getVideoTracks()[0]}catch(e){return micErr(e,'الكاميرا')}
+ if(!canCam||camS){t.stop();return}
+ camS=t;camCall=peer.call('itqan-'+room,new MediaStream([t]),{metadata:{k:'cam'}});setTimeout(()=>tuneCall(camCall,3e5,'balanced'),1200);
+ watchCall(camCall,'الكاميرا');showCam('me',new MediaStream([t]),'أنت',1);sys('📷 تم تشغيل الكاميرا وإرسالها للمعلم');ui()}
+function stopCam(){if(camS){camS.stop();camS=null}if(camCall){try{camCall.close()}catch(e){}camCall=null}hideCam('me');ui()}
+async function sMic(){
+ if(!canTalk)return alert('كتم المعلم ميكروفونك');
+ if(micS){micS.enabled=!micS.enabled;return ui()}
+ let t;try{t=(await navigator.mediaDevices.getUserMedia(MC)).getAudioTracks()[0]}catch(e){return micErr(e)}
+ if(!canTalk||micS){t.stop();return}
+ micS=t;meter(t);myCall=peer.call('itqan-'+room,new MediaStream([t]));ui();
+}
+function stopMic(){if(micS){micS.stop();micS=null}if(myCall){try{myCall.close()}catch(e){}myCall=null}ui()}
+function refresh(){
+ stream.getVideoTracks().forEach(t=>stream.removeTrack(t));
+ stream.addTrack(scrT||dummy);
+ $('#v').srcObject=stream;
+ st.cam=camT?1:0;st.scr=scrT?1:0;
+ Object.values(conns).filter(o=>o.adm).forEach(o=>{callOne(o);callCam(o)});camT?showCam('T',new MediaStream([camT]),'أنت',1):hideCam('T');bst();ui();
+}
+async function tMic(){
+ if(!micT){try{micT=(await navigator.mediaDevices.getUserMedia(MC)).getAudioTracks()[0];stream.addTrack(micT);meter(micT);st.mic=1;return refresh()}catch(e){return micErr(e)}}
+ micT.enabled=!micT.enabled;st.mic=micT.enabled?1:0;bst();ui();
+}
+async function tCam(){
+ if(camT){camT.stop();camT=null}
+ else try{camT=(await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720}})).getVideoTracks()[0]}catch(e){return alert('تعذر الوصول للكاميرا')}
+ refresh();
+}
+async function tScr(){
+ if(scrT){scrT.stop();scrT=null}
+ else try{scrT=(await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:15,max:30}},audio:false})).getVideoTracks()[0];scrT.contentHint='detail';scrT.onended=()=>{scrT=null;refresh()}}
+ catch(e){return alert(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?'تعذرت مشاركة الشاشة — افتح الصفحة في نافذة مستقلة':'مشاركة الشاشة غير مدعومة في متصفح الموبايل — استخدم كمبيوتر')}
+ refresh();
+}
+function tWb(){st.wb=st.wb?0:1;if(st.wb)st.bg=scrT?0:1;bst();ui()}
+function wclr(){strokes=[];rebuild();bc({t:'wbclear'})}
+function undo(){strokes.pop();rebuild();bc({t:'undo'})}
+function tBg(){st.bg=st.bg?0:1;bst();ui()}
+function tPoll(){
+ if(poll){
+  const c={};Object.values(poll.v).forEach(v=>c[v]=(c[v]||0)+1);
+  sys('نتيجة الاستفتاء «'+poll.q+'»: '+['نعم','لا','ربما'].map(o=>o+' = '+(c[o]||0)).join(' | '));
+  poll=null;bc({t:'pollend'});return ui();
+ }
+ const q=prompt('سؤال الاستفتاء (نعم / لا / ربما):');if(!q)return;
+ poll={q,v:{}};bc({t:'poll',q});ui();sys('بدأ الاستفتاء — اضغط 📊 مرة أخرى لإنهائه وعرض النتيجة');
+}
+function tRec(){
+ if(rec){rec.r.stop();clearInterval(rec.i);return}
+ const c=document.createElement('canvas');c.width=1280;c.height=720;const x=c.getContext('2d'),v=$('#v');
+ const i=setInterval(()=>{x.fillStyle='#2a2c38';x.fillRect(0,0,1280,720);
+  if(st.wb&&st.bg){x.fillStyle='#fff';x.fillRect(0,0,1280,720)}else if(st.scr)x.drawImage(v,0,0,1280,720);
+  else if(isBigT()&&boxes.T)x.drawImage(boxes.T.v,0,0,1280,720);
+  else{x.fillStyle='#5b2c50';x.beginPath();x.arc(640,360,100,0,7);x.fill();x.fillStyle='#f4a6d7';x.font='bold 100px sans-serif';x.textAlign='center';x.fillText('I',640,395)}
+  if(st.wb&&wb.width)x.drawImage(wb,OX,OY,LW*S,LH*S,0,0,1280,720);if(st.cam&&boxes.T&&!isBigT()){const r=boxes.T.el.getBoundingClientRect(),q=$('#stage').getBoundingClientRect();x.drawImage(boxes.T.v,(r.left-q.left)/q.width*1280,(r.top-q.top)/q.height*720,r.width/q.width*1280,r.height/q.height*720)}},40);
+ const o=new MediaStream([...c.captureStream(25).getTracks(),...stream.getAudioTracks()]);
+ const r=new MediaRecorder(o),ch=[];r.ondataavailable=e=>e.data.size&&ch.push(e.data);
+ r.onstop=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(ch,{type:'video/webm'}));a.download='itqan-class-'+Date.now()+'.webm';a.click();rec=null;ui();sys('تم حفظ التسجيل على جهازك')};
+ r.start(1000);rec={r,i};ui();sys('بدأ تسجيل الحصة');
+}
+
+/* ---------- الطالب ---------- */
+function showGate(i,t,b){$('#gi').textContent=i;$('#gt').textContent=t;$('#gb').hidden=!b;$('#gate').hidden=false}
+const CLOSED='الغرفة مغلقة — لم يفتحها المعلم بعد. ستدخل تلقائياً بمجرد فتحها.';
+function tryConn(){clearTimeout(rt);if(!peer||peer.destroyed||final)return;
+ conn=peer.connect('itqan-'+room,{reliable:true});
+ conn.on('open',()=>conn.send({t:'hello',n:name}));
+ conn.on('data',sData);
+ conn.on('close',()=>{if(final)return;if(admitted){admitted=0;sys('انقطع الاتصال بالمعلم')}stopMic();showGate('🔒',CLOSED);clearTimeout(rt);rt=setTimeout(tryConn,4000)})}
+function initS(){
+ admitted=0;final=0;showGate('⏳','جارٍ الاتصال بالغرفة...');
+ peer=new Peer(undefined,{config:ICE});
+ peer.on('error',e=>{if(e.type=='peer-unavailable'){showGate('🔒',CLOSED);clearTimeout(rt);rt=setTimeout(tryConn,4000)}else sys('خطأ في الاتصال: '+e.type)});
+ peer.on('open',tryConn);
+ peer.on('call',c=>{c.answer();
+  if(c.metadata&&c.metadata.k=='cam'){c.on('stream',s=>showCam('T',s,'المعلم'));c.on('close',()=>hideCam('T'));return}
+  c.on('stream',s=>{const v=$('#v');{const ha=s.getAudioTracks().length;if(ha!==lastA){lastA=ha;sys(ha?'وصل البث مع الصوت ✓':'وصل البث بدون صوت — ميكروفون المعلم غير مفعّل أو مكتوم')}}v.muted=true;v.srcObject=s;v.play().catch(()=>{});A.srcObject=s;A.play().then(()=>$('#unm').hidden=true).catch(()=>$('#unm').hidden=false)})});
+}
+function sData(d){
+ if(d.t=='wait'){showGate('⏳','أنت في غرفة الانتظار — سيسمح لك المعلم بالدخول قريباً')}
+ else if(d.t=='denied'||d.t=='kicked'){final=1;stopMic();showGate('⛔',d.t=='kicked'?'أخرجك المعلم من الحصة':(d.m||'رفض المعلم دخولك'),1)}
+ else if(d.t=='init'){admitted=1;$('#gate').hidden=true;chat=d.chat;st=d.st;strokes=d.strokes;ins=d.ins||ins;dirty=1;ui();fit();if(canTalk&&!micS){if(MOB)sys('اضغط 🎤 لتشغيل الميكروفون');else sMic()}}
+ else if(d.t=='chat'){chat.push(d)}
+ else if(d.t=='roster'){roster=d}
+ else if(d.t=='st'){st=d.st;ui()}
+ else if(d.t=='mic'){canTalk=d.on;if(d.on){if(!micS&&!MOB)sMic()}else stopMic();sys(d.on?'يمكنك الآن التحدث':'كتم المعلم ميكروفونك');ui()}
+ else if(d.t=='poll'){showPoll(d.q)}
+ else if(d.t=='pollend'){$('#poll').hidden=true}
+ else if(d.t=='cam'){canCam=d.on;if(!d.on)stopCam();sys(d.on?'يمكنك فتح الكاميرا':'أوقف المعلم كاميرات الطلاب');ui()}
+ else if(d.t=='sb'){cur=d.s;strokes.push(cur);penSeg(lx,cur,0);redraw()}
+ else if(d.t=='sp'&&cur){d.p.forEach(q=>{cur.p.push(q);penSeg(lx,cur,cur.p.length-1)});redraw()}
+ else if(d.t=='se'&&cur){tail(lx,cur);redraw()}
+ else if(d.t=='sh'){strokes.push(d.s);paint(d.s);redraw()}
+ else if(d.t=='undo'){strokes.pop();rebuild()}
+ else if(d.t=='wbclear'){strokes=[];rebuild()}
+ else if(d.t=='ins'){ins=d.ins;redraw()}
+ render();
+}
+function showPoll(q){
+ const p=$('#poll');p.hidden=false;
+ p.innerHTML='<b>📊 '+esc(q)+'</b><br>'+['نعم','لا','ربما'].map(o=>'<button>'+o+'</button>').join('');
+ p.querySelectorAll('button').forEach(b=>b.onclick=()=>{conn.send({t:'vote',v:b.textContent});p.innerHTML='✅ تم تسجيل إجابتك';setTimeout(()=>p.hidden=true,1500)});
+}
+function hand(){
+ if(role=='t'){hands.clear();roster2();return}
+ myHand=myHand?0:1;conn&&conn.open&&conn.send({t:'hand',on:myHand});ui();
+}
+function sync(){
+ if(role=='t'){refresh();sys('تمت مزامنة الاتصال');return}
+ clearTimeout(rt);stopMic();stopCam();canTalk=1;canCam=1;try{peer.destroy()}catch(e){}initS();sys('جارٍ إعادة الاتصال...');
+}
+function endCall(){
+ if(role=='t'&&!aiAsked&&(chat.some(x=>!x.sys)||LOG.tr.length)){aiAsked=1;if(confirm('هل تريد إنشاء ملخص الحصة بالذكاء الاصطناعي قبل الإغلاق؟')){aiOpen();return}}
+ if(!confirm(role=='t'?'إنهاء الحصة للجميع؟':'مغادرة الحصة؟'))return;
+ try{stream.getTracks().forEach(t=>t.stop());peer.destroy()}catch(e){}
+ location.reload();
+}
+
+/* ---------- الشات والواجهة ---------- */
+function send(){
+ const i=$('#ci'),m=i.value.trim();if(!m)return;
+ if(role=='t'){const o={n:name+' (المعلم)',m,ts:Date.now()};chat.push(o);bc({t:'chat',...o});render()}
+ else{if(st.lock||!conn||!conn.open)return;conn.send({t:'chat',n:name,m})}
+ i.value='';
+}
+$('#ci').onkeydown=e=>{if(e.key=='Enter')send()};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+function render(){
+ const L=$('#list');
+ const stu=roster.s,hd=roster.h,wn=role=='t'?Object.values(conns).filter(x=>!x.adm).length:0;
+ const [a,b,c]=document.querySelectorAll('.tabs button');
+ a.textContent='الشات ('+chat.filter(x=>!x.sys).length+')';
+ b.textContent='الطلاب ('+stu.length+')'+(wn?' 🔔'+wn:'');c.textContent='اليد المرفوعة ('+hd.length+')';
+ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('a',x.dataset.t==tab));
+ $('#cnt').textContent=stu.length;
+ if(tab=='chat')L.innerHTML=chat.map(x=>x.sys?'<div class="m s">'+esc(x.m)+'</div>':'<div class="m"><b>'+esc(x.n)+'</b>'+esc(x.m)+'</div>').join('')||'<div class="m s">لا توجد رسائل بعد</div>';
+ else if(role=='t'&&tab=='stu'){const B=c=>'style="background:'+c+';border-radius:10px;padding:4px 10px"',
+  E=Object.entries(conns),W=E.filter(([k,x])=>!x.adm),A=E.filter(([k,x])=>x.adm),
+  row=(i,n,b)=>'<div class="m" style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>'+i+esc(n)+'</span><span style="display:flex;gap:4px">'+b+'</span></div>';
+  L.innerHTML='<button class="m" style="background:#2c2f3e;color:#fff;text-align:center" onclick="cycleGm()">🚪 الدخول: '+['بموافقتي','تلقائي','مقفلة'][gm]+'</button>'+
+  (W.length?'<div class="m s">⏳ في غرفة الانتظار ('+W.length+')</div><button class="m" '+B('#1f9d55')+' onclick="admitAll()">قبول الجميع</button>'+W.map(([k,x])=>row('⏳ ',x.name,'<button '+B('#1f9d55')+' onclick="admit(\''+k+'\')">قبول</button><button '+B('#e5484d')+' onclick="deny(\''+k+'\')">رفض</button>')).join(''):'')+
+  '<button class="m" style="background:#6c5ce7;color:#fff;text-align:center" onclick="tMuteAll()">'+(allMuted?'🎤 إلغاء كتم الجميع':'🔇 كتم صوت جميع الطلاب')+'</button>'+
+  '<button class="m" style="background:#2c2f3e;color:#fff;text-align:center" onclick="tCamBan()">'+(camBanAll?'📷 السماح بكاميرات الطلاب':'🚫 منع كاميرات الطلاب')+'</button>'+
+  (A.map(([k,x])=>row(x.can?(x.mt?'🎙 ':'🟢 '):'🔇 ',x.name,'<button '+B('#6c5ce7')+' onclick="allow(\''+k+'\')">'+(x.can?'كتم':'إلغاء الكتم')+'</button><button '+B('#2c2f3e')+' title="كاميرا الطالب" onclick="camAllow(\''+k+'\')">'+(x.cp?'📷':'🚫')+'</button><button '+B('#e5484d')+' onclick="deny(\''+k+'\',1)">طرد</button>')).join('')||'<div class="m s">لا يوجد طلاب متصلون</div>')}
+ else{const arr=tab=='stu'?stu:hd;L.innerHTML=arr.map(n=>'<div class="m">'+(tab=='hand'?'✋ ':'🟢 ')+esc(n)+'</div>').join('')||'<div class="m s">'+(tab=='stu'?'لا يوجد طلاب متصلون':'لا توجد أيدٍ مرفوعة')+'</div>'}
+ if(tab=='chat')L.scrollTop=L.scrollHeight;
+}
+function ui(){
+ $('#av').hidden=!!(st.scr||isBigT());
+ $('#avt').textContent=(st.cam?'':'الكاميرا مقفولة — ')+(st.mic?'الصوت شغّال':'الصوت مكتوم');
+ $('#v').style.visibility=st.scr?'visible':'hidden';
+ const w=$('#wb');w.hidden=!st.wb;w.classList.toggle('bg',!!st.bg);if(st.wb)fit();
+ {const tv=!!(st.wb&&role=='t'),tb=$('#tb');tb.hidden=!tv;if(tv){if(!FP.tb){const q=$('#stage').getBoundingClientRect();FP.tb={fx:(q.left+58)/innerWidth,fy:(q.top+10)/innerHeight};FE.tb=tb}place(tb,'tb')}}
+ layoutCams();
+ $('#bm').classList.toggle('off',role=='t'?!st.mic:!(micS&&micS.enabled));$('#bm').style.opacity=(role=='s'&&!canTalk)?.35:1;$('#bc').classList.toggle('off',role=='t'?!st.cam:!camS);$('#bc').style.opacity=(role=='s'&&!canCam)?.35:1;
+ $('#bs').classList.toggle('on',!!st.scr);$('#bh').classList.toggle('on',!!myHand);
+ $('#tl').classList.toggle('on',!!allMuted);$('#tr').classList.toggle('on',!!rec);
+ $('#tp').classList.toggle('on',!!poll);$('#tw').classList.toggle('on',!!st.wb);
+ const i=$('#ci');if(role=='s'){i.disabled=!!st.lock;i.placeholder=st.lock?'الشات مقفول من المعلم':'اكتب للمعلم...'}
+}
+
+/* ---------- السبورة ---------- */
+const wb=$('#wb'),cx=wb.getContext('2d'),lay=document.createElement('canvas'),lx=lay.getContext('2d');
+const LW=1600,LH=900,RL=800,RH=84,PR=300,COLS=['#1a1a2e','#e11d2e','#2563eb','#16a34a','#f59e0b','#7c3aed','#facc15','#ffffff'];
+let S=1,OX=0,OY=0,tool='pen',col=COLS[0],wd=5,cur=null,pv=null,hov=null,drag=null,snap=null,pend=[],lastSend=0,dirty=0,
+ ins={r:{on:0,x:800,y:450,a:0},p:{on:0,x:800,y:560,a:0},c:{x:0,y:0,r:0,a:0,armed:0}};
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+function fit(){const w=wb.clientWidth,h=wb.clientHeight;if(!w)return;
+ const d=Math.min(window.devicePixelRatio||1,3),W=Math.round(w*d),H=Math.round(h*d);
+ if(W!==wb.width||H!==wb.height||dirty){wb.width=lay.width=W;wb.height=lay.height=H;S=Math.min(W/LW,H/LH);OX=(W-LW*S)/2;OY=(H-LH*S)/2;dirty=0;rebuild()}else redraw()}
+function rebuild(){lx.setTransform(1,0,0,1,0,0);lx.clearRect(0,0,lay.width,lay.height);lx.setTransform(S,0,0,S,OX,OY);strokes.forEach(s=>paint(s));redraw()}
+const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+function sty(c,s){c.lineCap=c.lineJoin='round';c.lineWidth=s.w;c.strokeStyle=s.c;c.globalCompositeOperation=s.e?'destination-out':'source-over'}
+function penSeg(c,s,i){const p=s.p;c.save();sty(c,s);c.beginPath();
+ if(i<1){c.moveTo(p[0][0],p[0][1]);c.lineTo(p[0][0]+.01,p[0][1])}
+ else{const a=i>=2?mid(p[i-2],p[i-1]):p[0],e=mid(p[i-1],p[i]);c.moveTo(a[0],a[1]);c.quadraticCurveTo(p[i-1][0],p[i-1][1],e[0],e[1])}
+ c.stroke();c.restore()}
+function tail(c,s){const p=s.p,n=p.length;if(n<2)return;const a=mid(p[n-2],p[n-1]);c.save();sty(c,s);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(p[n-1][0],p[n-1][1]);c.stroke();c.restore()}
+function paint(s){if(s.k=='p'){s.p.forEach((q,i)=>penSeg(lx,s,i));tail(lx,s)}else drawShape(lx,s)}
+function drawShape(c,s){const a=s.a,b=s.b,dx=b[0]-a[0],dy=b[1]-a[1];c.save();c.lineCap=c.lineJoin='round';c.lineWidth=s.w;c.strokeStyle=s.c;c.beginPath();
+ switch(s.k){
+ case 'l':c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);break;
+ case 'a':{c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);const t=Math.atan2(dy,dx),L=16+s.w*2;[Math.PI-.5,Math.PI+.5].forEach(o=>{c.moveTo(b[0],b[1]);c.lineTo(b[0]+L*Math.cos(t+o),b[1]+L*Math.sin(t+o))});break}
+ case 'r':c.rect(a[0],a[1],dx,dy);break;
+ case 'c':c.arc(a[0],a[1],Math.hypot(dx,dy),0,7);break;
+ case 'e':c.ellipse((a[0]+b[0])/2,(a[1]+b[1])/2,Math.abs(dx)/2,Math.abs(dy)/2,0,0,7);break;
+ case 't':c.moveTo((a[0]+b[0])/2,a[1]);c.lineTo(a[0],b[1]);c.lineTo(b[0],b[1]);c.closePath();break;
+ case 'rt':c.moveTo(a[0],a[1]);c.lineTo(a[0],b[1]);c.lineTo(b[0],b[1]);c.closePath();break;
+ case 'h':{const r=Math.hypot(dx,dy),t0=Math.atan2(dy,dx);for(let i=0;i<6;i++){const q=t0+i*Math.PI/3,X=a[0]+r*Math.cos(q),Y=a[1]+r*Math.sin(q);i?c.lineTo(X,Y):c.moveTo(X,Y)}c.closePath();break}
+ }
+ c.stroke();c.restore()}
+function drawIns(c){
+ if(ins.r.on){const o=ins.r,L=RL/2,h=RH/2;c.save();c.translate(o.x,o.y);c.rotate(o.a);
+  c.fillStyle='rgba(255,224,130,.82)';c.strokeStyle='#8a6d1d';c.lineWidth=2;c.fillRect(-L,-h,RL,RH);c.strokeRect(-L,-h,RL,RH);
+  c.fillStyle='#4a3a0a';c.strokeStyle='#4a3a0a';c.font='16px sans-serif';c.textAlign='center';c.textBaseline='alphabetic';
+  for(let i=0;i<=RL/4;i++){const x=-L+i*4,l=i%10==0?22:i%5==0?15:9;c.beginPath();c.moveTo(x,-h);c.lineTo(x,-h+l);c.lineWidth=1;c.stroke();if(i%10==0&&i>0&&i<RL/4)c.fillText(String(i/10),x,-h+42)}
+  c.beginPath();c.arc(L-18,0,11,0,7);c.fillStyle='#6c5ce7';c.fill();c.restore()}
+ if(ins.p.on){const o=ins.p;c.save();c.translate(o.x,o.y);c.rotate(o.a);
+  c.beginPath();c.arc(0,0,PR,Math.PI,2*Math.PI);c.closePath();c.fillStyle='rgba(120,200,255,.32)';c.fill();c.strokeStyle='#1e6a99';c.lineWidth=2;c.stroke();
+  c.fillStyle='#0b3c5d';c.textAlign='center';c.textBaseline='middle';
+  for(let d=0;d<=180;d++){const t=-d*Math.PI/180,co=Math.cos(t),si=Math.sin(t),l=d%10==0?22:d%5==0?15:9;c.beginPath();c.moveTo(PR*co,PR*si);c.lineTo((PR-l)*co,(PR-l)*si);c.lineWidth=1;c.stroke();
+   if(d%10==0){c.font='15px sans-serif';c.fillText(String(d),(PR-38)*co,(PR-38)*si);if(d>0&&d<180){c.font='12px sans-serif';c.fillText(String(180-d),(PR-62)*co,(PR-62)*si)}}}
+  c.beginPath();c.moveTo(-14,0);c.lineTo(14,0);c.moveTo(0,-14);c.lineTo(0,14);c.lineWidth=2;c.stroke();
+  c.beginPath();c.arc(PR+22,0,11,0,7);c.fillStyle='#6c5ce7';c.fill();c.restore()}
+ const k=ins.c;if(k.r>0){const P=[k.x,k.y],T=[k.x+k.r*Math.cos(k.a),k.y+k.r*Math.sin(k.a)],M=[(P[0]+T[0])/2,(P[1]+T[1])/2],Ll=Math.max(k.r*.85,k.r/2+40),hh=Math.sqrt(Ll*Ll-k.r*k.r/4);
+  let n=[-(T[1]-P[1])/k.r,(T[0]-P[0])/k.r];if(n[1]>0)n=[-n[0],-n[1]];const H=[M[0]+n[0]*hh,M[1]+n[1]*hh];
+  c.save();c.lineCap='round';c.setLineDash(k.armed?[]:[8,6]);c.lineWidth=5;c.strokeStyle='#666';c.beginPath();c.moveTo(P[0],P[1]);c.lineTo(H[0],H[1]);c.stroke();
+  c.strokeStyle=k.col||'#e11d2e';c.beginPath();c.moveTo(H[0],H[1]);c.lineTo(T[0],T[1]);c.stroke();
+  c.setLineDash([]);c.fillStyle='#6c5ce7';c.beginPath();c.arc(H[0],H[1],9,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(P[0],P[1],5,0,7);c.fill();c.restore()}
+}
+function redraw(){const W=wb.width,H=wb.height;if(!W)return;cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,W,H);cx.drawImage(lay,0,0);
+ cx.setTransform(S,0,0,S,OX,OY);if(pv)drawShape(cx,pv);drawIns(cx);
+ if(role=='t'&&tool=='era'&&hov){cx.beginPath();cx.arc(hov[0],hov[1],wd*3,0,7);cx.strokeStyle='#888';cx.lineWidth=2;cx.stroke()}}
+/* التقاط المسطرة والمنقلة */
+function cands(){const o=[];
+ if(ins.r.on){const r=ins.r,d=[Math.cos(r.a),Math.sin(r.a)],n=[-d[1],d[0]],L=RL/2,h=RH/2,P=(u,v)=>[r.x+d[0]*u+n[0]*v,r.y+d[1]*u+n[1]*v];o.push({s:P(-L,-h),e:P(L,-h)},{s:P(-L,h),e:P(L,h)})}
+ if(ins.p.on){const q=ins.p,d=[Math.cos(q.a),Math.sin(q.a)];o.push({s:[q.x-d[0]*PR,q.y-d[1]*PR],e:[q.x+d[0]*PR,q.y+d[1]*PR]},{c:[q.x,q.y],a:q.a})}
+ return o}
+function snapTo(g,p){
+ if(g.s){const dx=g.e[0]-g.s[0],dy=g.e[1]-g.s[1],u=Math.max(0,Math.min(1,((p[0]-g.s[0])*dx+(p[1]-g.s[1])*dy)/(dx*dx+dy*dy)));return[g.s[0]+u*dx,g.s[1]+u*dy]}
+ const co=Math.cos(g.a),si=Math.sin(g.a),x=p[0]-g.c[0],y=p[1]-g.c[1],u=x*co+y*si,v=-x*si+y*co;let f=Math.atan2(v,u);if(f>0)f=f>Math.PI/2?-Math.PI:0;
+ const X=PR*Math.cos(f),Y=PR*Math.sin(f);return[g.c[0]+X*co-Y*si,g.c[1]+X*si+Y*co]}
+function pickSnap(p){let b=null,m=26;cands().forEach(g=>{const d=dist(p,snapTo(g,p));if(d<m){m=d;b=g}});return b}
+/* تحريك الأدوات */
+function hit(p){
+ for(const k of ['p','r']){const o=ins[k];if(!o.on)continue;const t=o.a,d=[Math.cos(t),Math.sin(t)],n=[-d[1],d[0]],u=(p[0]-o.x)*d[0]+(p[1]-o.y)*d[1],v=(p[0]-o.x)*n[0]+(p[1]-o.y)*n[1],hu=k=='r'?RL/2-18:PR+22;
+  if(Math.hypot(u-hu,v)<24)return{w:'rot',k};
+  if(k=='r'?(Math.abs(u)<=RL/2&&Math.abs(v)<=RH/2):(Math.hypot(u,v)<=PR&&v<=12))return{w:'mov',k,dx:o.x-p[0],dy:o.y-p[1]}}
+ return null}
+const sendIns=()=>bc({t:'ins',ins});
+function flush(f){if(pend.length&&(f||Date.now()-lastSend>40)){bc({t:'sp',p:pend});pend=[];lastSend=Date.now()}}
+function down(p){
+ if(tool=='mv'){drag=hit(p);return}
+ if(tool=='comp'){const k=ins.c;
+  if(!k.armed||dist(p,[k.x,k.y])<25){ins.c={x:p[0],y:p[1],r:0,a:0,armed:0,col};drag={w:'cs'};sendIns();redraw();return}
+  k.col=col;cur={k:'p',c:col,w:wd,e:0,p:[[k.x+k.r*Math.cos(k.a),k.y+k.r*Math.sin(k.a)]]};strokes.push(cur);penSeg(lx,cur,0);bc({t:'sb',s:cur});drag={w:'ca',last:k.a};redraw();return}
+ if(tool=='pen'||tool=='era'){
+  snap=tool=='pen'?pickSnap(p):null;const q=snap?snapTo(snap,p):p;
+  cur={k:'p',c:col,w:tool=='era'?wd*6:wd,e:tool=='era'?1:0,p:[q]};strokes.push(cur);penSeg(lx,cur,0);bc({t:'sb',s:cur});drag={w:'pen'};redraw();return}
+ snap=(tool=='l'||tool=='a')?pickSnap(p):null;const q=snap?snapTo(snap,p):p;drag={w:'shape'};pv={k:tool,c:col,w:wd,a:q,b:q};redraw()}
+function move(p){
+ if(!drag){if(tool=='era')redraw();return}
+ const w=drag.w;
+ if(w=='pen'){const q=snap?snapTo(snap,p):p,l=cur.p[cur.p.length-1];if(dist(q,l)<1)return;cur.p.push(q);penSeg(lx,cur,cur.p.length-1);pend.push(q);flush(false);redraw()}
+ else if(w=='shape'){pv.b=snap?snapTo(snap,p):p;redraw()}
+ else if(w=='cs'){const k=ins.c;k.r=dist(p,[k.x,k.y]);k.a=Math.atan2(p[1]-k.y,p[0]-k.x);sendIns();redraw()}
+ else if(w=='ca'){const k=ins.c,ang=Math.atan2(p[1]-k.y,p[0]-k.x);let dl=ang-drag.last;while(dl>Math.PI)dl-=2*Math.PI;while(dl<-Math.PI)dl+=2*Math.PI;
+  const n=Math.max(1,Math.ceil(Math.abs(dl)/.05));for(let i=1;i<=n;i++){const a=drag.last+dl*i/n,q=[k.x+k.r*Math.cos(a),k.y+k.r*Math.sin(a)];cur.p.push(q);penSeg(lx,cur,cur.p.length-1);pend.push(q)}
+  drag.last=ang;k.a=ang;flush(false);sendIns();redraw()}
+ else if(w=='mov'){const o=ins[drag.k];o.x=p[0]+drag.dx;o.y=p[1]+drag.dy;sendIns();redraw()}
+ else if(w=='rot'){const o=ins[drag.k];o.a=Math.atan2(p[1]-o.y,p[0]-o.x);sendIns();redraw()}}
+function up(){
+ if(!drag)return;const w=drag.w;
+ if(w=='pen'||w=='ca'){flush(true);tail(lx,cur);bc({t:'se'});if(w=='ca')sendIns()}
+ else if(w=='shape'){const s=pv;pv=null;if(dist(s.a,s.b)>3){strokes.push(s);paint(s);bc({t:'sh',s})}}
+ else if(w=='cs'){ins.c.armed=ins.c.r>8?1:0;sendIns()}
+ drag=null;cur=null;redraw()}
+function lp(e){const r=wb.getBoundingClientRect(),k=wb.width/r.width;return[((e.clientX-r.left)*k-OX)/S,((e.clientY-r.top)*k-OY)/S]}
+wb.onpointerdown=e=>{if(role!='t')return;e.preventDefault();wb.setPointerCapture(e.pointerId);down(lp(e))};
+wb.onpointermove=e=>{if(role!='t')return;hov=lp(e);move(hov)};
+wb.onpointerup=wb.onpointercancel=e=>{if(role=='t')up()};
+wb.onpointerleave=()=>{hov=null;if(!drag)redraw()};
+addEventListener('resize',fit);
+document.addEventListener('fullscreenchange',()=>setTimeout(fit,100));
+/* شريط الأدوات */
+function buildTb(){const t=$('#tb');t.innerHTML='';
+ const B=(h,ti,f,c)=>{const b=document.createElement('button');b.innerHTML=h;b.title=ti;if(c)b.className=c;b.onclick=f;t.appendChild(b);return b},
+  SP=()=>{const i=document.createElement('i');i.className='sp';t.appendChild(i)};
+ const gr=B('⠿','اسحب لتحريك الشريط (يمكن وضعه خارج السبورة)',()=>{},'grip');mkDrag(t,'tb',gr);
+ [['pen','✏️','قلم'],['era','🧽','ممحاة (مساحة)'],['l','╱','خط مستقيم'],['a','➜','سهم'],['r','▭','مستطيل'],['c','◯','دائرة'],['e','⬭','شكل بيضاوي'],['t','△','مثلث'],['rt','◺','مثلث قائم'],['h','⬡','سداسي'],['comp','🧭','برجل (اسحب لتحديد نصف القطر ثم ارسم القوس)'],['mv','✥','تحريك المسطرة والمنقلة']]
+  .forEach(([k,i,ti])=>{B(i,ti,()=>{if(k=='comp'&&tool=='comp'){ins.c={x:0,y:0,r:0,a:0,armed:0};sendIns();redraw()}tool=k;refTb()}).dataset.tool=k});
+ SP();B('📏','مسطرة',()=>insTog('r')).dataset.ins='r';B('📐','منقلة',()=>insTog('p')).dataset.ins='p';SP();
+ COLS.forEach(c=>{const b=B('','لون',()=>{col=c;refTb()},'sw');b.style.background=c;b.dataset.col=c});SP();
+ [[2,'رفيع'],[5,'متوسط'],[10,'سميك']].forEach(([w,ti])=>{B('<i style="display:block;border-radius:9px;background:#fff;width:20px;height:'+Math.max(2,w*.8)+'px"></i>',ti,()=>{wd=w;refTb()}).dataset.w=w});SP();
+ B('↩','تراجع',undo);B('🗑','مسح الكل',wclr);B('◐','خلفية: بيضاء / شفافة',tBg);refTb()}
+function refTb(){document.querySelectorAll('#tb [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool==tool));
+ document.querySelectorAll('#tb [data-col]').forEach(b=>b.classList.toggle('on',b.dataset.col==col));
+ document.querySelectorAll('#tb [data-w]').forEach(b=>b.classList.toggle('on',+b.dataset.w==wd));
+ document.querySelectorAll('#tb [data-ins]').forEach(b=>b.classList.toggle('on',!!ins[b.dataset.ins].on))}
+/* ---------- عناصر عائمة: الكاميرات وشريط الأدوات ---------- */
+const FP={},FE={},boxes={};
+function place(el,id){const p=FP[id];if(!p)return;const w=el.offsetWidth,h=el.offsetHeight;
+ el.style.left=Math.max(0,Math.min(innerWidth-w,p.fx*innerWidth))+'px';el.style.top=Math.max(0,Math.min(innerHeight-h,p.fy*innerHeight))+'px'}
+function mkDrag(el,id,h){h=h||el;FE[id]=el;
+ h.addEventListener('pointerdown',e=>{if(e.button||e.target.tagName=='BUTTON'&&e.target!==h)return;e.preventDefault();
+  const r=el.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;h.setPointerCapture(e.pointerId);
+  const mv=ev=>{FP[id]={fx:(ev.clientX-dx)/innerWidth,fy:(ev.clientY-dy)/innerHeight};place(el,id)},
+   up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up)};
+  h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)})}
+function defPos(id){const r=$('#stage').getBoundingClientRect(),W=innerWidth,H=innerHeight;
+ if(id=='T')return{fx:(r.left+12)/W,fy:(r.bottom-157)/H};
+ if(id=='me')return{fx:(r.right-192)/W,fy:(r.bottom-157)/H};
+ const n=Object.keys(boxes).filter(k=>k!='T'&&k!='me').length;return{fx:(r.right-192)/W,fy:(r.top+64+n*112)/H}}
+function isBigT(){const b=boxes.T;return !!b&&(b.mode=='big'||(b.mode=='auto'&&!!st.cam&&!st.scr&&!st.wb))}
+function showCam(id,stream,label,mirror){
+ const t=stream.getVideoTracks()[0];let b=boxes[id];
+ if(!b){const el=document.createElement('div');el.className='cb';el.innerHTML='<video autoplay playsinline muted></video><span></span><button title="تكبير / تصغير">⤢</button>';
+  el.querySelector('span').textContent=label;if(mirror)el.querySelector('video').style.transform='scaleX(-1)';
+  if(!FP[id])FP[id]=defPos(id);
+  $('#fl').appendChild(el);b=boxes[id]={el,v:el.querySelector('video'),mode:id=='T'?'auto':'small',mirror};
+  el.querySelector('button').onclick=()=>camMode(id);
+  el.addEventListener('pointerdown',e=>{b.x=e.clientX;b.y=e.clientY});
+  el.addEventListener('pointerup',e=>{if(e.target.tagName=='BUTTON'||Math.hypot(e.clientX-b.x,e.clientY-b.y)>5)return;const n=Date.now();if(n-(b.t||0)<350){b.t=0;camMode(id)}else b.t=n});
+  mkDrag(el,id)}
+ if(b.tid!==(t&&t.id)){b.tid=t&&t.id;b.v.srcObject=stream;b.v.play().catch(()=>{});
+  if(id=='T'){const cv=$('#cv');cv.srcObject=stream;cv.style.transform=mirror?'scaleX(-1)':'';cv.play().catch(()=>{})}}
+ layoutCams()}
+function hideCam(id){const b=boxes[id];if(!b)return;b.el.remove();delete boxes[id];delete FE[id];if(id!='T'&&id!='me')delete FP[id];if(id=='T')$('#cv').srcObject=null;layoutCams()}
+function camMode(id){const b=boxes[id];if(!b)return;b.mode=id=='T'?(isBigT()?'small':'big'):(b.mode=='big'?'small':'big');layoutCams()}
+function layoutCams(){const big=isBigT();$('#cv').style.display=big?'block':'none';$('#cvb').hidden=!big;
+ Object.entries(boxes).forEach(([id,b])=>{const hide=id=='T'&&(!st.cam||big),lg=id!='T'&&b.mode=='big';
+  b.el.hidden=hide;b.el.style.width=lg?'360px':'';b.el.style.height=lg?'203px':'';if(!hide)place(b.el,id)})}
+function relayout(){layoutCams();if(FE.tb&&!$('#tb').hidden)place($('#tb'),'tb')}
+addEventListener('resize',relayout);
+document.addEventListener('fullscreenchange',()=>{(document.fullscreenElement||document.body).appendChild($('#fl'));setTimeout(relayout,150)});
+
+/* ---------- ملحق ملخص الحصة بالذكاء الاصطناعي ---------- */
+const AIDEF={gemini:'gemini-2.5-flash',openai:'gpt-4o-mini',anthropic:'claude-haiku-5-5',webhook:''};
+const LOG={start:0,att:[],tr:[]};let sr=null,srOn=0,aiAsked=0;
+const aiSt=(m,e)=>{const x=$('#ai_st');x.textContent=m;x.style.color=e?'#ff8a8a':''};
+function aiLoad(){try{return JSON.parse(localStorage.getItem('itqan_ai')||'{}')}catch(e){return{}}}
+function aiSave(){try{localStorage.setItem('itqan_ai',JSON.stringify({provider:$('#ai_prov').value,key:$('#ai_key').value,model:$('#ai_model').value,url:$('#ai_url').value,lang:$('#ai_lang').value}))}catch(e){}}
+function aiOpen(){const c=aiLoad();if(c.provider)$('#ai_prov').value=c.provider;$('#ai_key').value=c.key||'';$('#ai_model').value=c.model||'';$('#ai_url').value=c.url||'';if(c.lang)$('#ai_lang').value=c.lang;aiProv(1);$('#aip').hidden=false;aiUi()}
+function aiClose(){aiSave();$('#aip').hidden=true}
+function aiProv(keep){const p=$('#ai_prov').value,m=$('#ai_model'),w=p=='webhook';
+ if(!keep&&(!m.value||Object.values(AIDEF).includes(m.value)))m.value=AIDEF[p];if(keep&&!m.value)m.value=AIDEF[p];
+ $('#ai_key').hidden=w;m.hidden=w;$('#ai_url').hidden=!w}
+function aiUi(){$('#ai_trc').textContent=LOG.tr.length?LOG.tr.length+' مقطع مفرَّغ':'';$('#ai_sr').textContent=srOn?'⏹ إيقاف التفريغ الصوتي':'🎙 بدء التفريغ الصوتي'}
+function srToggle(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR)return aiSt('هذا المتصفح لا يدعم التفريغ الصوتي — استخدم Chrome أو Edge على الكمبيوتر، أو اكتب ملاحظاتك في الخانة',1);
+ if(srOn){srOn=0;try{sr.stop()}catch(e){}aiUi();return}
+ sr=new SR();sr.lang=$('#ai_lang').value;sr.continuous=true;sr.interimResults=false;
+ sr.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal){const t=e.results[i][0].transcript.trim();if(t){LOG.tr.push({ts:Date.now(),t});aiUi()}}};
+ sr.onend=()=>{if(srOn)setTimeout(()=>{try{sr.start()}catch(e){}},300)};
+ sr.onerror=e=>{if(e.error=='not-allowed'||e.error=='service-not-allowed'){srOn=0;aiSt('لم يُسمح بالتفريغ الصوتي — اسمح بالميكروفون للموقع',1);aiUi()}};
+ srOn=1;try{sr.start()}catch(e){}aiSt('');aiUi()}
+function aiData(){const fm=t=>new Date(t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+ return{title:'حصة '+room,date:new Date(LOG.start||Date.now()).toLocaleDateString('ar-EG'),minutes:Math.round((Date.now()-(LOG.start||Date.now()))/60000),teacher:name,
+  attendance:$('#ai_att').checked?LOG.att.map(a=>fm(a.ts)+' — '+a.n+' '+a.ev):[],
+  chat:$('#ai_chat').checked?chat.filter(x=>!x.sys).map(x=>(x.ts?fm(x.ts)+' ':'')+x.n+': '+x.m):[],
+  polls:chat.filter(x=>x.sys&&String(x.m).startsWith('نتيجة الاستفتاء')).map(x=>x.m),
+  transcript:$('#ai_tr').checked?LOG.tr.map(x=>fm(x.ts)+' '+x.t):[],notes:$('#ai_notes').value.trim()}}
+function aiPrompt(d){const cut=(a,n)=>a.join('\n').slice(-n);
+ return 'أنت مساعد تعليمي. لخّص الحصة الدراسية التالية بالعربية الفصحى المبسطة بصيغة منظمة تتضمن: عنوان الحصة، ملخص قصير (3 إلى 5 أسطر)، النقاط والمفاهيم الرئيسية، الأمثلة أو التمارين التي نُوقشت، أسئلة الطلاب وإجاباتها، الواجبات أو المهام المطلوبة، وتوصيات للمعلم للحصة القادمة. اعتمد فقط على المعلومات الواردة، ولا تخترع معلومات غير موجودة، وإن كان قسم بلا بيانات فاكتب «لا يوجد».\n\n'+
+ 'المعلم: '+d.teacher+'\nالتاريخ: '+d.date+'\nالمدة التقريبية: '+d.minutes+' دقيقة\n\n'+
+ '## الحضور\n'+(cut(d.attendance,4000)||'لا يوجد')+'\n\n## نص كلام المعلم (تفريغ صوتي)\n'+(cut(d.transcript,60000)||'لا يوجد')+'\n\n## رسائل الشات\n'+(cut(d.chat,20000)||'لا يوجد')+'\n\n## نتائج الاستفتاءات\n'+(cut(d.polls,3000)||'لا يوجد')+'\n\n## ملاحظات المعلم\n'+(d.notes||'لا يوجد')}
+async function aiHttp(url,opt){const r=await fetch(url,opt),t=await r.text();if(!r.ok)throw new Error('HTTP '+r.status+' '+t.slice(0,160));let j=null;try{j=JSON.parse(t)}catch(e){}return{t,j}}
+async function aiCall(p,key,model,url,d){const prompt=aiPrompt(d);
+ if(p=='webhook'){const o=await aiHttp(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...d,prompt})});return o.j&&(o.j.summary||o.j.text||o.j.result)||o.t}
+ if(p=='gemini'){const o=await aiHttp('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  return o.j.candidates[0].content.parts.map(x=>x.text||'').join('')}
+ if(p=='openai'){const o=await aiHttp('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'user',content:prompt}]})});return o.j.choices[0].message.content}
+ const o=await aiHttp('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+ return o.j.content.map(x=>x.text||'').join('')}
+async function aiRun(){aiSave();const d=aiData();
+ if(!d.chat.length&&!d.transcript.length&&!d.notes&&!d.attendance.length)return aiSt('لا توجد بيانات للتلخيص بعد — شغّل التفريغ الصوتي أو اكتب ملاحظات',1);
+ const p=$('#ai_prov').value,key=$('#ai_key').value.trim(),model=$('#ai_model').value.trim(),url=$('#ai_url').value.trim();
+ if(p=='webhook'){if(!/^https:\/\//.test(url))return aiSt('أدخل رابط السكريبت (يبدأ بـ https)',1)}else if(!key)return aiSt('أدخل مفتاح API',1);
+ else if(!model)return aiSt('أدخل اسم النموذج',1);
+ $('#ai_go').disabled=true;aiSt('جارٍ إنشاء الملخص...');
+ try{const t=await aiCall(p,key,model,url,d);$('#ai_out').value=String(t).trim();aiSt('تم ✓')}catch(e){aiSt('تعذر إنشاء الملخص: '+e.message,1)}
+ $('#ai_go').disabled=false}
+function aiCopy(){const o=$('#ai_out');o.select();try{navigator.clipboard.writeText(o.value)}catch(e){document.execCommand('copy')}aiSt('تم النسخ ✓')}
+function aiDl(){const v=$('#ai_out').value;if(!v)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+v],{type:'text/plain;charset=utf-8'}));a.download='class-summary-'+room+'-'+new Date().toISOString().slice(0,10)+'.txt';a.click()}
+function aiShare(){const v=$('#ai_out').value.trim();if(!v)return;const parts=('📝 ملخص الحصة:\n'+v).match(/[\s\S]{1,450}/g).slice(0,8);
+ parts.forEach(m=>{const o={n:name+' (المعلم)',m,ts:Date.now()};chat.push(o);bc({t:'chat',...o})});render();aiSt('أُرسل للطلاب ✓')}
+function insTog(k){ins[k].on=ins[k].on?0:1;if(ins[k].on)tool='mv';refTb();sendIns();redraw()}
+</script>
+</body>
+</html>
