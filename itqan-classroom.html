@@ -185,7 +185,7 @@ body:not([data-role=t]) #aib{display:none}
 <script>
 const SRC='<!doctype html>'+document.documentElement.outerHTML;
 const $=s=>document.querySelector(s);
-const VER='2026.10.19-g';
+const VER='2026.10.19-h';
 $('#ver').textContent='الإصدار '+VER;
 
 const ICE={iceServers:[
@@ -285,7 +285,7 @@ function roster2(){
 function tuneCall(call,br,pref){try{const pc=call&&call.peerConnection;if(!pc)return;pc.getSenders().forEach(se=>{if(!se.track||se.track.kind!='video')return;const q=se.getParameters();if(!q.encodings||!q.encodings.length)q.encodings=[{}];q.encodings[0].maxBitrate=br;q.degradationPreference=pref;se.setParameters(q).catch(()=>{})})}catch(e){}}
 function tune(o){const n=Object.values(conns).filter(x=>x.adm).length;tuneCall(o.call,n<=4?3e6:n<=10?1.8e6:1e6,scrT?'maintain-resolution':'balanced')}
 function callCam(o){try{o.cc&&o.cc.close()}catch(e){}o.cc=null;if(!camT)return;o.cc=peer.call(o.c.peer,new MediaStream([camT]),{metadata:{k:'cam'}});setTimeout(()=>tuneCall(o.cc,4e5,'balanced'),900)}
-function callOne(o){try{o.call&&o.call.close()}catch(e){}o.call=peer.call(o.c.peer,new MediaStream(stream.getTracks().filter(t=>t!==o.mt)));setTimeout(()=>tune(o),900);setTimeout(()=>tune(o),3500)}
+function callOne(o){try{o.call&&o.call.close()}catch(e){}o.call=peer.call(o.c.peer,new MediaStream(stream.getTracks()));setTimeout(()=>tune(o),900);setTimeout(()=>tune(o),3500)}
 function dropMic(o){let ch=0;if(o.mt){stream.removeTrack(o.mt);o.mt=null;ch=1}if(o.au){o.au.srcObject=null;o.au=null}if(ch)refresh()}
 function allow(k){const o=conns[k];if(!o)return;o.can=o.can?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o);render()}
 function tMuteAll(){allMuted=allMuted?0:1;Object.values(conns).filter(o=>o.adm).forEach(o=>{o.can=allMuted?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o)});ui();render();sys(allMuted?'تم كتم صوت جميع الطلاب':'تم إلغاء كتم الطلاب')}
@@ -450,7 +450,7 @@ function ui(){
  const w=$('#wb');w.hidden=!st.wb;w.classList.toggle('bg',!!st.bg);if(st.wb)fit();
  {const tv=!!(st.wb&&role=='t'),tb=$('#tb');tb.hidden=!tv;if(tv){if(!FP.tb){const q=$('#stage').getBoundingClientRect();FP.tb={fx:(q.left+58)/innerWidth,fy:(q.top+10)/innerHeight};FE.tb=tb}place(tb,'tb')}}
  layoutCams();
- $('#bm').classList.toggle('off',role=='t'?!st.mic:!(micS&&micS.enabled));$('#bm').style.opacity=(role=='s'&&!canTalk)?.35:1;$('#bc').classList.toggle('off',role=='t'?!st.cam:!camS);$('#bc').style.opacity=(role=='s'&&!canCam)?.35:1;
+ $('#bm').classList.toggle('off',role=='t'?!st.mic:!(micS&&micS.enabled));$('#bm$.opacity')=(role=='s'&&!canTalk)?.35:1;$('#bc').classList.toggle('off',role=='t'?!st.cam:!camS);$('#bc').style.opacity=(role=='s'&&!canCam)?.35:1;
  $('#bs').classList.toggle('on',!!st.scr);$('#bh').classList.toggle('on',!!myHand);
  $('#tl').classList.toggle('on',!!allMuted);$('#tr').classList.toggle('on',!!rec);
  $('#tp').classList.toggle('on',!!poll);$('#tw').classList.toggle('on',!!st.wb);
