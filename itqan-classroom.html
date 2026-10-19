@@ -204,16 +204,19 @@ function roster2(){
  bc({t:'roster',...roster});render();
 }
 function comp(){
- if(!compT){cc=document.createElement('canvas');cc.width=1280;cc.height=720;cctx=cc.getContext('2d');
+ if(!compT){cc=document.createElement('canvas');cc.width=1920;cc.height=1080;cctx=cc.getContext('2d');
   sv=document.createElement('video');cvv=document.createElement('video');[sv,cvv].forEach(v=>{v.muted=true;v.playsInline=true});
-  compT=cc.captureStream(25).getVideoTracks()[0];
+  compT=cc.captureStream(25).getVideoTracks()[0];compT.contentHint='detail';
   const tick=()=>{if(scrT&&camT)drawComp()};
   try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),40)'])));w.onmessage=tick}catch(e){setInterval(tick,40)}}
  sv.srcObject=new MediaStream([scrT]);cvv.srcObject=new MediaStream([camT]);sv.play().catch(()=>{});cvv.play().catch(()=>{});return compT}
-function drawComp(){const x=cctx;x.fillStyle='#000';x.fillRect(0,0,1280,720);
- const w=sv.videoWidth,h=sv.videoHeight;if(w){const k=Math.min(1280/w,720/h),dw=w*k,dh=h*k;x.drawImage(sv,(1280-dw)/2,(720-dh)/2,dw,dh)}
- if(cvv.videoWidth){const cw=300,ch=cw*cvv.videoHeight/cvv.videoWidth,y=720-ch-16;x.drawImage(cvv,16,y,cw,ch);x.strokeStyle='#fff';x.lineWidth=3;x.strokeRect(16,y,cw,ch)}}
-function callOne(o){try{o.call&&o.call.close()}catch(e){}o.call=peer.call(o.c.peer,new MediaStream(stream.getTracks().filter(t=>t!==o.mt)))}
+function drawComp(){const x=cctx,W=1920,H=1080;x.imageSmoothingQuality='high';x.fillStyle='#000';x.fillRect(0,0,W,H);
+ const w=sv.videoWidth,h=sv.videoHeight;if(w){const k=Math.min(W/w,H/h),dw=w*k,dh=h*k;x.drawImage(sv,(W-dw)/2,(H-dh)/2,dw,dh)}
+ if(cvv.videoWidth){const cw=440,ch=cw*cvv.videoHeight/cvv.videoWidth,y=H-ch-24;x.drawImage(cvv,24,y,cw,ch);x.strokeStyle='#fff';x.lineWidth=4;x.strokeRect(24,y,cw,ch)}}
+function tune(o){try{const pc=o.call&&o.call.peerConnection;if(!pc)return;const n=Object.keys(conns).length,br=n<=4?3e6:n<=10?1.8e6:1e6;
+ pc.getSenders().forEach(se=>{if(!se.track||se.track.kind!='video')return;const q=se.getParameters();if(!q.encodings||!q.encodings.length)q.encodings=[{}];
+  q.encodings[0].maxBitrate=br;q.degradationPreference=(scrT||compT&&stream.getVideoTracks()[0]===compT)?'maintain-resolution':'balanced';se.setParameters(q).catch(()=>{})})}catch(e){}}
+function callOne(o){try{o.call&&o.call.close()}catch(e){}o.call=peer.call(o.c.peer,new MediaStream(stream.getTracks().filter(t=>t!==o.mt)));setTimeout(()=>tune(o),900);setTimeout(()=>tune(o),3500)}
 function dropMic(o){let ch=0;if(o.mt){stream.removeTrack(o.mt);o.mt=null;ch=1}if(o.au){o.au.srcObject=null;o.au=null}if(ch)refresh()}
 function allow(k){const o=conns[k];if(!o)return;o.can=o.can?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o);render()}
 function tMuteAll(){allMuted=allMuted?0:1;Object.values(conns).forEach(o=>{o.can=allMuted?0:1;o.c.send({t:'mic',on:o.can});if(!o.can)dropMic(o)});ui();render();sys(allMuted?'تم كتم صوت جميع الطلاب':'تم إلغاء كتم الطلاب')}
@@ -244,7 +247,7 @@ async function tCam(){
 }
 async function tScr(){
  if(scrT){scrT.stop();scrT=null}
- else try{scrT=(await navigator.mediaDevices.getDisplayMedia({video:true})).getVideoTracks()[0];scrT.onended=()=>{scrT=null;refresh()}}
+ else try{scrT=(await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:15,max:30}},audio:false})).getVideoTracks()[0];scrT.contentHint='detail';scrT.onended=()=>{scrT=null;refresh()}}
  catch(e){return alert(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?'تعذرت مشاركة الشاشة — افتح الصفحة في نافذة مستقلة':'مشاركة الشاشة غير مدعومة في متصفح الموبايل — استخدم كمبيوتر')}
  refresh();
 }
@@ -296,6 +299,7 @@ function sData(d){
  else if(d.t=='pollend'){$('#poll').hidden=true}
  else if(d.t=='sb'){cur=d.s;strokes.push(cur);penSeg(lx,cur,0);redraw()}
  else if(d.t=='sp'&&cur){d.p.forEach(q=>{cur.p.push(q);penSeg(lx,cur,cur.p.length-1)});redraw()}
+ else if(d.t=='se'&&cur){tail(lx,cur);redraw()}
  else if(d.t=='sh'){strokes.push(d.s);paint(d.s);redraw()}
  else if(d.t=='undo'){strokes.pop();rebuild()}
  else if(d.t=='wbclear'){strokes=[];rebuild()}
@@ -365,12 +369,17 @@ let S=1,OX=0,OY=0,tool='pen',col=COLS[0],wd=5,cur=null,pv=null,hov=null,drag=nul
  ins={r:{on:0,x:800,y:450,a:0},p:{on:0,x:800,y:560,a:0},c:{x:0,y:0,r:0,a:0,armed:0}};
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 function fit(){const w=wb.clientWidth,h=wb.clientHeight;if(!w)return;
- const d=Math.min(window.devicePixelRatio||1,2),W=Math.round(w*d),H=Math.round(h*d);
+ const d=Math.min(window.devicePixelRatio||1,3),W=Math.round(w*d),H=Math.round(h*d);
  if(W!==wb.width||H!==wb.height||dirty){wb.width=lay.width=W;wb.height=lay.height=H;S=Math.min(W/LW,H/LH);OX=(W-LW*S)/2;OY=(H-LH*S)/2;dirty=0;rebuild()}else redraw()}
 function rebuild(){lx.setTransform(1,0,0,1,0,0);lx.clearRect(0,0,lay.width,lay.height);lx.setTransform(S,0,0,S,OX,OY);strokes.forEach(s=>paint(s));redraw()}
-function penSeg(c,s,i){const p=s.p;c.save();c.lineCap=c.lineJoin='round';c.lineWidth=s.w;c.strokeStyle=s.c;c.globalCompositeOperation=s.e?'destination-out':'source-over';
- c.beginPath();if(i<1){c.moveTo(p[0][0],p[0][1]);c.lineTo(p[0][0]+.01,p[0][1])}else{c.moveTo(p[i-1][0],p[i-1][1]);c.lineTo(p[i][0],p[i][1])}c.stroke();c.restore()}
-function paint(s){if(s.k=='p')s.p.forEach((q,i)=>penSeg(lx,s,i));else drawShape(lx,s)}
+const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+function sty(c,s){c.lineCap=c.lineJoin='round';c.lineWidth=s.w;c.strokeStyle=s.c;c.globalCompositeOperation=s.e?'destination-out':'source-over'}
+function penSeg(c,s,i){const p=s.p;c.save();sty(c,s);c.beginPath();
+ if(i<1){c.moveTo(p[0][0],p[0][1]);c.lineTo(p[0][0]+.01,p[0][1])}
+ else{const a=i>=2?mid(p[i-2],p[i-1]):p[0],e=mid(p[i-1],p[i]);c.moveTo(a[0],a[1]);c.quadraticCurveTo(p[i-1][0],p[i-1][1],e[0],e[1])}
+ c.stroke();c.restore()}
+function tail(c,s){const p=s.p,n=p.length;if(n<2)return;const a=mid(p[n-2],p[n-1]);c.save();sty(c,s);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(p[n-1][0],p[n-1][1]);c.stroke();c.restore()}
+function paint(s){if(s.k=='p'){s.p.forEach((q,i)=>penSeg(lx,s,i));tail(lx,s)}else drawShape(lx,s)}
 function drawShape(c,s){const a=s.a,b=s.b,dx=b[0]-a[0],dy=b[1]-a[1];c.save();c.lineCap=c.lineJoin='round';c.lineWidth=s.w;c.strokeStyle=s.c;c.beginPath();
  switch(s.k){
  case 'l':c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);break;
@@ -445,7 +454,7 @@ function move(p){
  else if(w=='rot'){const o=ins[drag.k];o.a=Math.atan2(p[1]-o.y,p[0]-o.x);sendIns();redraw()}}
 function up(){
  if(!drag)return;const w=drag.w;
- if(w=='pen'||w=='ca'){flush(true);if(w=='ca')sendIns()}
+ if(w=='pen'||w=='ca'){flush(true);tail(lx,cur);bc({t:'se'});if(w=='ca')sendIns()}
  else if(w=='shape'){const s=pv;pv=null;if(dist(s.a,s.b)>3){strokes.push(s);paint(s);bc({t:'sh',s})}}
  else if(w=='cs'){ins.c.armed=ins.c.r>8?1:0;sendIns()}
  drag=null;cur=null;redraw()}
