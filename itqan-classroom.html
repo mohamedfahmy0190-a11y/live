@@ -242,13 +242,18 @@ $('#ver').textContent='الإصدار '+VER;
    الخيار 1 (الأسهل): سجّل مجاناً في metered.ca وضع رابط الـAPI هنا:
         https://اسم-تطبيقك.metered.live/api/v1/turn/credentials?apiKey=مفتاحك
    الخيار 2: ضع بيانات TURN ثابتة داخل TURN_STATIC. */
-const TURN_API='';
+const TURN_APP='itqanacademy';   // ← اكتب هنا اسم تطبيقك على Metered (الجزء اللي قبل .metered.live)
+const TURN_API=TURN_APP?'https://'+TURN_APP+'.metered.live/api/v1/turn/credentials?apiKey=ec36bcbe293a66fdaa1428b806a44837c54e':'';
 const TURN_STATIC=[]; // مثال: {urls:['turn:host:80','turns:host:443?transport=tcp'],username:'..',credential:'..'}
 const STUN=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}];
-let ICE={iceServers:STUN},hasTurn=0;
+let ICE={iceServers:STUN},hasTurn=0,iceWhy='';
 async function getIce(){
  let tu=[];
- if(TURN_API){try{const c=new AbortController(),tm=setTimeout(()=>c.abort(),4000);const r=await fetch(TURN_API,{signal:c.signal});clearTimeout(tm);if(r.ok){const j=await r.json();tu=Array.isArray(j)?j:(j.iceServers||[])}}catch(e){}}
+ iceWhy=TURN_API?'':'TURN_APP فاضي';
+ if(TURN_API){try{let tm;const r=await Promise.race([fetch(TURN_API),new Promise((_,j)=>{tm=setTimeout(()=>j(new Error('timeout')),7000)})]);clearTimeout(tm);
+  if(r.ok){const j=await r.json();tu=Array.isArray(j)?j:(j.iceServers||[]);if(!tu.length)iceWhy='الرد بدون خوادم: '+JSON.stringify(j).slice(0,140)}
+  else{let t='';try{t=(await r.text()).slice(0,140)}catch(e){}iceWhy='HTTP '+r.status+' '+t}}
+  catch(e){iceWhy='تعذر الوصول للرابط ('+(e&&e.name)+') — غالباً اسم التطبيق غير صحيح أو الشبكة تحجب الطلب'}}
  if(!tu.length)tu=TURN_STATIC;
  hasTurn=tu.some(x=>JSON.stringify(x.urls||'').indexOf('turn')>-1);
  ICE={iceServers:STUN.concat(tu)};return ICE}
@@ -310,7 +315,7 @@ async function initT(){
 }
 async function startTPeer(){
  const ice=await getIce();
- if(!hasTurn&&!tTries)sys('⚠️ لم يتم ضبط خادم TURN — طلاب الشبكات المختلفة (خصوصاً الموبايل) قد لا يتمكنون من الاتصال. راجع TURN_API أعلى الكود.');
+ if(!hasTurn&&!tTries)sys('⚠️ لم يتم ضبط خادم TURN — طلاب الشبكات المختلفة (خصوصاً الموبايل) قد لا يتمكنون من الاتصال. راجع TURN_API أعلى الكود.'+(iceWhy?' — السبب: '+iceWhy:''));
  const p=peer=new Peer('itqan-'+room,{config:ice});let opened=0;
  p.on('open',()=>{if(!opened){opened=1;tTries=0;sys('✓ الغرفة جاهزة ويمكن للطلاب الدخول')}});
  p.on('disconnected',()=>{if(p.destroyed)return;sys('⚠️ انقطع الاتصال بخادم الغرف — جارٍ إعادة الاتصال تلقائياً');const re=()=>{if(p.destroyed||!p.disconnected)return;try{p.reconnect()}catch(e){}setTimeout(re,3000)};setTimeout(re,1000)});
@@ -468,18 +473,21 @@ function tryConn(){clearTimeout(rt);if(!peer||peer.destroyed||final)return;
  if(conn&&conn.open)return;
  try{conn&&conn.close()}catch(e){}
  const c=conn=peer.connect('itqan-'+room,{reliable:true});let ok=0;
- const ct=setTimeout(()=>{if(ok||conn!==c||final)return;conn=null;try{c.close()}catch(e){}showGate('⏳','الاتصال بالغرفة بطيء — جارٍ إعادة المحاولة...'+(hasTurn?'':' (لو تكرر الأمر جرّب شبكة أخرى)'));rt=setTimeout(tryConn,2500)},12000);
- c.on('open',()=>{ok=1;clearTimeout(ct);c.send({t:'hello',n:name})});
+ const ct=setTimeout(()=>{if(ok||conn!==c||final)return;conn=null;try{c.close()}catch(e){}cFail++;showGate('⏳',cFail>=2?T('connHelp'):('الاتصال بالغرفة بطيء — جارٍ إعادة المحاولة...'+(hasTurn?'':' (لو تكرر الأمر جرّب شبكة أخرى)')));rt=setTimeout(tryConn,2500)},20000);
+ c.on('open',()=>{ok=1;cFail=0;clearTimeout(ct);c.send({t:'hello',n:name})});
  c.on('data',sData);
  c.on('close',()=>{clearTimeout(ct);if(conn!==c||final)return;if(admitted){admitted=0;sys('انقطع الاتصال بالمعلم')}dropCall();showGate('🔒',CLOSED);clearTimeout(rt);rt=setTimeout(tryConn,4000)});
  c.on('error',()=>{})}
 async function initS(){
- admitted=0;final=0;showGate('⏳','جارٍ الاتصال بالغرفة...');
+ admitted=0;final=0;
+ if(!(window.RTCPeerConnection||window.webkitRTCPeerConnection)){showGate('⚠️',T('noRtc'),1);return}
+ showGate('⏳','جارٍ الاتصال بالغرفة...'+(sTries?' ('+(sTries+1)+')':''));
  const ice=await getIce();
- const p=peer=new Peer(undefined,{config:ice});
+ const p=peer=new Peer(undefined,{config:ice});let up=0;
+ const wd=setTimeout(()=>{if(up||peer!==p||final)return;sTries++;try{p.destroy()}catch(e){}if(sTries<4)initS();else wsDiag(ok=>showGate('⚠️',T(ok?'connHelp':'sigHelp'),1))},10000);
  p.on('error',e=>{if(e.type=='peer-unavailable'){showGate('🔒',CLOSED);clearTimeout(rt);rt=setTimeout(tryConn,4000)}else if(['network','server-error','socket-error','socket-closed'].indexOf(e.type)>-1){showGate('⏳','مشكلة في الوصول لخادم الغرف — جارٍ إعادة المحاولة...');clearTimeout(rt);rt=setTimeout(tryConn,3000)}else sys('خطأ في الاتصال: '+e.type)});
  p.on('disconnected',()=>{if(p.destroyed||final)return;clearTimeout(rt);rt=setTimeout(tryConn,1500)});
- p.on('open',()=>{if(!(conn&&conn.open))tryConn()});
+ p.on('open',()=>{up=1;clearTimeout(wd);sTries=0;if(!(conn&&conn.open))tryConn()});
  peer.on('call',c=>{c.answer();
   if(c.metadata&&c.metadata.k=='cam'){c.on('stream',s=>showCam('T',s,'المعلم'));c.on('close',()=>hideCam('T'));return}
   c.on('stream',s=>{const v=$('#v');{const ha=s.getAudioTracks().length;if(ha!==lastA){lastA=ha;sys(ha?'وصل البث مع الصوت ✓':'وصل البث بدون صوت — ميكروفون المعلم غير مفعّل أو مكتوم')}}v.muted=true;v.srcObject=s;v.play().catch(()=>{});A.srcObject=s;A.play().then(()=>$('#unm').hidden=true).catch(()=>$('#unm').hidden=false)})});
@@ -1165,6 +1173,10 @@ function trAttr(el){if(el.closest&&el.closest('[translate=no]'))return;const m=e
 function trTree(root){if(root.nodeType==3)return trText(root);if(root.nodeType!=1)return;trAttr(root);const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);let n=w.nextNode();while(n){n.nodeType==3?trText(n):trAttr(n);n=w.nextNode()}}
 function trAll(){trTree(document.body);document.title=LANG=='en'?LT(TT0):TT0}
 new MutationObserver(ms=>{if(LANG!='en')return;ms.forEach(m=>{if(m.type=='characterData')trText(m.target);else if(m.type=='attributes')trAttr(m.target);else m.addedNodes.forEach(trTree)})}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATT});
+let sTries=0,cFail=0;
+Object.assign(I18.ar,{noRtc:'هذا المتصفح لا يدعم الاتصال المباشر (غالباً متصفح داخل تطبيق مثل فيسبوك أو ماسنجر). افتح الرابط مباشرة في Safari أو Chrome.',connHelp:'تعذر إنشاء اتصال مباشر مع المعلم. جرّب: ١) بدّل بين Wi-Fi والبيانات، ٢) أوقف VPN أو Private Relay، ٣) افتح الرابط في Safari مباشرة. وإن استمر الأمر فالمعلم يحتاج لضبط خادم TURN.',sigHelp:'تعذر الوصول لخادم الغرف. تأكد من الإنترنت، وأوقف VPN أو حاجب الإعلانات والمحتوى، أو جرّب شبكة أخرى.'});
+Object.assign(I18.en,{noRtc:'This browser does not support direct connections (usually an in-app browser such as Facebook or Messenger). Open the link directly in Safari or Chrome.',connHelp:'Could not establish a direct connection with the teacher. Try: 1) switch between Wi-Fi and mobile data, 2) turn off VPN or Private Relay, 3) open the link directly in Safari. If it persists, the teacher needs to set up a TURN server.',sigHelp:'Could not reach the room server. Check your internet, turn off VPN or ad/content blockers, or try another network.'});
+function wsDiag(cb){let d=0;const f=ok=>{if(!d){d=1;cb(ok)}};try{const r=()=>Math.random().toString(36).slice(2,10),ws=new WebSocket('wss://0.peerjs.com/peerjs?key=peerjs&id=d'+r()+'&token='+r());ws.onopen=()=>{f(1);try{ws.close()}catch(e){}};ws.onerror=()=>f(0);setTimeout(()=>{f(0);try{ws.close()}catch(e){}},6000)}catch(e){f(0)}}
 try{setLang(localStorage.getItem('itqan_lang')||'ar')}catch(e){setLang('ar')}
 </script>
 </body>
