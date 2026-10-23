@@ -244,7 +244,9 @@ $('#ver').textContent='الإصدار '+VER;
    الخيار 2: ضع بيانات TURN ثابتة داخل TURN_STATIC. */
 const TURN_APP='itqanacademy';   // ← اكتب هنا اسم تطبيقك على Metered (الجزء اللي قبل .metered.live)
 const TURN_API=TURN_APP?'https://'+TURN_APP+'.metered.live/api/v1/turn/credentials?apiKey=ec36bcbe293a66fdaa1428b806a44837c54e':'';
-const TURN_STATIC=[]; // مثال: {urls:['turn:host:80','turns:host:443?transport=tcp'],username:'..',credential:'..'}
+/* خيار مجاني بحصة كبيرة: ExpressTURN (expressturn.com) — انسخ من لوحة التحكم عنوان السيرفر واسم المستخدم وكلمة المرور */
+const EXP_HOST='free.expressturn.com',EXP_USER='000000002108147160',EXP_PASS='D7J7GfSpiCux0A+tN3gbDbZ2OW4=';
+const TURN_STATIC=EXP_USER?[{urls:['turn:'+EXP_HOST+':3478?transport=udp','turn:'+EXP_HOST+':3478?transport=tcp','turns:'+EXP_HOST+':443?transport=tcp'],username:EXP_USER,credential:EXP_PASS}]:[]; // مثال: {urls:['turn:host:80','turns:host:443?transport=tcp'],username:'..',credential:'..'}
 const STUN=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}];
 let ICE={iceServers:STUN},hasTurn=0,iceWhy='';
 async function getIce(){
@@ -254,7 +256,7 @@ async function getIce(){
   if(r.ok){const j=await r.json();tu=Array.isArray(j)?j:(j.iceServers||[]);if(!tu.length)iceWhy='الرد بدون خوادم: '+JSON.stringify(j).slice(0,140)}
   else{let t='';try{t=(await r.text()).slice(0,140)}catch(e){}iceWhy='HTTP '+r.status+' '+t}}
   catch(e){iceWhy='تعذر الوصول للرابط ('+(e&&e.name)+') — غالباً اسم التطبيق غير صحيح أو الشبكة تحجب الطلب'}}
- if(!tu.length)tu=TURN_STATIC;
+ tu=tu.concat(TURN_STATIC);if(!tu.length&&!iceWhy)iceWhy='لا توجد بيانات TURN';
  hasTurn=tu.some(x=>JSON.stringify(x.urls||'').indexOf('turn')>-1);
  ICE={iceServers:STUN.concat(tu)};return ICE}
 const MC={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
