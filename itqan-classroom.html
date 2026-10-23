@@ -131,6 +131,14 @@ body[data-role=t] #brc{display:none}#brc,#tr{min-width:44px;width:auto!important
 #dsm{position:fixed;inset-block-start:70px;inset-inline-start:14px;width:min(560px,94vw);height:430px;z-index:42;background:var(--side);border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:6px;box-shadow:0 10px 36px #0008}#dsm[hidden]{display:none}
 #dsm .ch{display:flex;justify-content:space-between;align-items:center}#dsm .ch button{background:#2c2f3e;border-radius:8px;padding:2px 9px;margin-inline-start:4px}#dsb{flex:1;background:#fff;color:#111;border-radius:10px;overflow:hidden;min-height:0}
 #dsm.mn{height:auto}#dsm.mn #dsb{display:none}#dsm.mx{inset:8px;width:auto;height:auto;z-index:60}
+#bd,#bk,#tw{display:none}body[data-role=t] #bh{display:none}
+.c{position:relative}.c.off{background:#2c2f3e}
+.c.st{background:#2c2f3e;filter:grayscale(1) brightness(.7)}
+.c.st.lt{background:#1f8f55;filter:none;box-shadow:0 0 0 2px rgba(92,242,154,.35),0 0 16px rgba(61,220,132,.75)}
+.ic{position:relative;display:inline-block;min-width:22px;text-align:center;margin-inline-end:2px;font-size:15px}
+.ic{filter:grayscale(1) brightness(.65);opacity:.75}.ic.lt{filter:none;opacity:1;text-shadow:0 0 8px #3ddc84;background:rgba(31,143,85,.35);border-radius:6px}
+#tmr{background:#2c2f3e;border-radius:10px;padding:2px 8px;font-size:13px;font-variant-numeric:tabular-nums;direction:ltr}
+#tlm{position:fixed;z-index:60;background:#151722;border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 8px 28px #000a;min-width:200px}#tlm[hidden]{display:none}#tlm button{background:#2c2f3e;border-radius:8px;padding:8px 10px;text-align:start}
 </style>
 </head>
 <body data-role="">
@@ -144,8 +152,8 @@ body[data-role=t] #brc{display:none}#brc,#tr{min-width:44px;width:auto!important
   <input id="room" data-i18n-p="room" placeholder="رمز الغرفة (المعلم: اتركه فارغاً لإنشاء غرفة جديدة)">
   <div class="row"><button data-i18n="tch" onclick="join('t')">دخول كمعلم</button><button data-i18n="stu" onclick="join('s')">دخول كطالب</button></div>
   <button class="w" id="lgb" onclick="toggleLang()">English</button>
-  <button class="w" onclick="pop()">↗ فتح في نافذة مستقلة بكامل الصلاحيات</button>
-  <small>داخل مواقع جوجل تُمنع الكاميرا والميكروفون ومشاركة الشاشة — استخدم النافذة المستقلة.</small>
+  
+  
   <small id="ver" style="opacity:.6"></small>
  </div>
 </div>
@@ -157,8 +165,8 @@ body[data-role=t] #brc{display:none}#brc,#tr{min-width:44px;width:auto!important
 <div id="app">
  <div class="col">
   <div class="top">
-   <div><img class="lg" src="data:image/png;base64,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" alt="Itqan Academy"><span class="badge live"><i></i>مباشر</span><span>حصة مباشرة</span></div>
-   <button class="pop" onclick="pop()">↗ فتح في نافذة مستقلة بكامل الصلاحيات</button>
+   <div><img class="lg" src="data:image/png;base64,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" alt="Itqan Academy"><span class="badge live"><i></i>مباشر</span><span id="tmr" data-i18n-t="timer" title="مدة الحصة">⏱ 00:00</span></div>
+   
    <button class="pop" id="lgb2" onclick="toggleLang()">English</button>
    <button class="pop" id="aib" onclick="aiOpen()">🤖 ملخص الحصة</button>
    <div><span class="badge gray">👥 <span id="cnt">0</span></span><span class="badge green" id="vb">〰 صوت</span></div>
@@ -169,15 +177,16 @@ body[data-role=t] #brc{display:none}#brc,#tr{min-width:44px;width:auto!important
    <canvas id="wb" hidden></canvas>
    <video id="cv" autoplay playsinline muted style="display:none"></video>
    <button id="cvb" hidden onclick="camMode('T')" title="تصغير الكاميرا">⤡</button>
-   <button id="fs" onclick="$('#stage').requestFullscreen&&$('#stage').requestFullscreen()" title="ملء الشاشة">⛶</button>
+   <button id="fs" onclick="fsToggle()" title="ملء الشاشة">⛶</button>
    <div id="tag">Itqan Academy 🎤</div>
    <button id="unm" hidden onclick="A.play();$('#v').play();this.hidden=true" style="position:absolute;z-index:6;top:60px;left:50%;transform:translateX(-50%);background:#6c5ce7;border-radius:12px;padding:10px 18px">🔊 اضغط لتفعيل الصوت</button>
    <div id="poll" hidden></div>
   </div>
   <div class="bar">
-   <button class="c" id="bm" onclick="mic()" data-i18n-t="mic" title="الميكروفون">🎤</button>
-   <button class="c off" id="bc" onclick="cam()" data-i18n-t="cam" title="الكاميرا">📷</button>
-   <button class="c tonly" id="bs" onclick="tScr()" title="مشاركة الشاشة">🖥</button>
+   <button class="c st" id="bm" onclick="mic()" data-i18n-t="mic" title="الميكروفون">🎤</button>
+   <button class="c st" id="bc" onclick="cam()" data-i18n-t="cam" title="الكاميرا">📷</button>
+   <button class="c tonly st" id="bs" onclick="tScr()" title="مشاركة الشاشة">🖥</button>
+   <button class="c st" id="bt" onclick="toolsMenu(this)" data-i18n-t="tools" title="الأدوات">🖍</button>
    <button class="c" id="bh" onclick="hand()" data-i18n-t="hand" title="رفع اليد">✋</button>
    <button class="c" id="bp" onclick="pmOpen()" data-i18n-t="pm" title="رسالة خاصة">💬</button>
    <button class="c" id="brc" onclick="tRec()" data-i18n-t="rec" title="تسجيل الحصة على جهازك">⏺</button>
@@ -257,6 +266,7 @@ function micErr(e,what,gate){what=what||'الميكروفون';
  const m='تعذر تشغيل '+what+' ('+w+'). '+h+'.';if(gate){$('#mgt').textContent=m;$('#mg').hidden=false}else sys(m+' ما زال بإمكانك سماع الدرس.')}
 let lastA=-1,micP=null,roomName='',tTries=0,rfT=0;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const U=s=>'<span translate="no">'+esc(s)+'</span>';
 let role,name,room,peer,conn,conns={},chat=[],roster={s:[],h:[]},tab='chat',canTalk=1,micS,myCall,camS,camCall,canCam=1,camBanAll=0,allMuted=0,gm=0,admitted=0,final=0,rt,st={cam:0,scr:0,mic:1,wb:0,bg:1,lock:0},
  stream=new MediaStream(),camT,micT,scrT,compT,sv,cvv,cc,cctx,hands=new Set(),poll=null,rec=null,strokes=[],myHand=0;
 const dcv=document.createElement('canvas');dcv.width=dcv.height=16;const dx=dcv.getContext('2d');let df=0;
@@ -282,11 +292,11 @@ function join(r){
  if(!rn){if(r=='s')return alert('اكتب رمز الغرفة، أو افتح رابط الدعوة اللي بعته المعلم');rn=genCode();$('#room').value=rn}
  name=$('#nm').value.trim()||(r=='t'?'المعلم':'طالب');
  roomName=rn;room=rn.toLowerCase().replace(/[^\w-]/g,c=>'_'+c.charCodeAt(0).toString(16));
- role=r;document.body.dataset.role=r;A.src=SIL;A.play().catch(()=>{});$('#join').hidden=true;
+ role=r;sessT0=Date.now();{const tb=$('#bt');tb.dataset.i18nT=r=='t'?'board':'tools';if(r=='s')tb.textContent='🧮'}document.body.dataset.role=r;A.src=SIL;A.play().catch(()=>{});$('#join').hidden=true;
  if(r=='s')prepMic(1).then(ok=>ok&&sendMic());
  if(r=='t'){$('#v').muted=true;buildTb();initT()}else initS();
- render();ui();if(role=='t')LOG.start=Date.now();sys('الغرفة: '+rn+(role=='t'?' — شارك هذا الرمز مع الطلاب':'')+' • الإصدار '+VER);
- if(role=='t'){const u=inviteURL();sys(u?'🔗 رابط الدعوة: '+u+' (أو زر 🔗 للمشاركة)':'🔗 رمز الغرفة: '+rn)}
+ render();ui();setLang(LANG);if(role=='t')LOG.start=Date.now();sys('الغرفة: '+rn+(role=='t'?' — شارك هذا الرمز مع الطلاب':'')+' • الإصدار '+VER);
+ if(role=='t'){mailTeacherIn();const u=inviteURL();sys(u?'🔗 رابط الدعوة: '+u+' (أو زر 🔗 للمشاركة)':'🔗 رمز الغرفة: '+rn)}
 }
 const bc=o=>Object.values(conns).filter(x=>x.adm).forEach(x=>{try{x.c.send(o)}catch(e){}});
 const bst=()=>bc({t:'st',st});
@@ -335,7 +345,7 @@ function tData(c,d){
  else if(d.t=='vote'&&poll){poll.v[c.peer]=d.v}
 }
 function admit(k){const o=conns[k];if(!o||o.adm)return;o.adm=1;o.can=allMuted?0:1;o.cp=camBanAll?0:1;
- o.c.send({t:'init',chat:chat.filter(x=>!x.sys),st,strokes,ins,can:o.can});if(!o.can)o.c.send({t:'mic',on:0});LOG.att.push({ts:Date.now(),n:o.name,ev:'دخل'});callOne(o);callCam(o);if(!o.cp)o.c.send({t:'cam',on:0});roster2()}
+ mailStu(o.name);o.c.send({t:'init',chat:chat.filter(x=>!x.sys),st,strokes,ins,can:o.can});if(!o.can)o.c.send({t:'mic',on:0});LOG.att.push({ts:Date.now(),n:o.name,ev:'دخل'});callOne(o);callCam(o);if(!o.cp)o.c.send({t:'cam',on:0});roster2()}
 function admitAll(){Object.keys(conns).forEach(admit)}
 function deny(k,kick){const o=conns[k];if(!o)return;if(o.adm)LOG.att.push({ts:Date.now(),n:o.name,ev:kick?'طُرد':'خرج'});try{o.c.send({t:kick?'kicked':'denied'})}catch(e){}dropMic(o);delete conns[k];hands.delete(k);hideCam('s:'+k);setTimeout(()=>{try{o.c.close()}catch(e){}},300);roster2()}
 function camAllow(k){const o=conns[k];if(!o||!o.adm)return;o.cp=o.cp?0:1;o.c.send({t:'cam',on:o.cp});if(!o.cp){try{o.sc&&o.sc.close()}catch(e){}hideCam('s:'+k)}render()}
@@ -419,7 +429,7 @@ async function tCam(){
 async function tScr(){
  if(scrT){scrT.stop();scrT=null}
  else try{scrT=(await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:15,max:30}},audio:false})).getVideoTracks()[0];scrT.contentHint='detail';scrT.onended=()=>{scrT=null;refresh()}}
- catch(e){return alert(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?'تعذرت مشاركة الشاشة — افتح الصفحة في نافذة مستقلة':'مشاركة الشاشة غير مدعومة في متصفح الموبايل — استخدم كمبيوتر')}
+ catch(e){return alert(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?'تعذرت مشاركة الشاشة — افتح الصفحة مباشرة في Chrome أو Edge':'مشاركة الشاشة غير مدعومة في متصفح الموبايل — استخدم كمبيوتر')}
  refresh();
 }
 function tWb(){st.wb=st.wb?0:1;if(st.wb)st.bg=scrT?0:1;bst();ui()}
@@ -496,7 +506,7 @@ function sData(d){
 }
 function showPoll(q){
  const p=$('#poll');p.hidden=false;
- p.innerHTML='<b>📊 '+esc(q)+'</b><br>'+['نعم','لا','ربما'].map(o=>'<button>'+o+'</button>').join('');
+ p.innerHTML='<b>📊 '+U(q)+'</b><br>'+['نعم','لا','ربما'].map(o=>'<button>'+o+'</button>').join('');
  p.querySelectorAll('button').forEach(b=>b.onclick=()=>{conn.send({t:'vote',v:b.textContent});p.innerHTML='✅ تم تسجيل إجابتك';setTimeout(()=>p.hidden=true,1500)});
 }
 function hand(){
@@ -510,7 +520,7 @@ function sync(){
 function endCall(){
  if(role=='t'&&!aiAsked&&(chat.some(x=>!x.sys)||LOG.tr.length)){aiAsked=1;if(confirm('هل تريد إنشاء ملخص الحصة بالذكاء الاصطناعي قبل الإغلاق؟')){aiOpen();return}}
  if(!confirm(role=='t'?'إنهاء الحصة للجميع؟':'مغادرة الحصة؟'))return;
- try{stream.getTracks().forEach(t=>t.stop());peer.destroy()}catch(e){}
+ mailEnd();try{stream.getTracks().forEach(t=>t.stop());peer.destroy()}catch(e){}
  location.reload();
 }
 
@@ -531,16 +541,16 @@ function render(){
  b.textContent='الطلاب ('+stu.length+')'+(wn?' 🔔'+wn:'');c.textContent='اليد المرفوعة ('+hd.length+')';
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('a',x.dataset.t==tab));
  $('#cnt').textContent=stu.length;
- if(tab=='chat')L.innerHTML=chat.map(x=>x.sys?'<div class="m s">'+esc(x.m)+'</div>':'<div class="m"><b>'+esc(x.n)+'</b>'+esc(x.m)+'</div>').join('')||'<div class="m s">لا توجد رسائل بعد</div>';
+ if(tab=='chat')L.innerHTML=chat.map(x=>x.sys?'<div class="m s">'+esc(x.m)+'</div>':'<div class="m"><b>'+U(x.n)+'</b>'+U(x.m)+'</div>').join('')||'<div class="m s">لا توجد رسائل بعد</div>';
  else if(role=='t'&&tab=='stu'){const B=c=>'style="background:'+c+';border-radius:10px;padding:4px 10px"',
   E=Object.entries(conns),W=E.filter(([k,x])=>!x.adm),A=E.filter(([k,x])=>x.adm),
-  row=(i,n,b)=>'<div class="m" style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>'+i+esc(n)+'</span><span style="display:flex;gap:4px">'+b+'</span></div>';
+  row=(i,n,b)=>'<div class="m" style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>'+i+U(n)+'</span><span style="display:flex;gap:4px">'+b+'</span></div>';
   L.innerHTML='<button class="m" style="background:#2c2f3e;color:#fff;text-align:center" onclick="cycleGm()">🚪 الدخول: '+['بموافقتي','تلقائي','مقفلة'][gm]+'</button>'+
   (W.length?'<div class="m s">⏳ في غرفة الانتظار ('+W.length+')</div><button class="m" '+B('#1f9d55')+' onclick="admitAll()">قبول الجميع</button>'+W.map(([k,x])=>row('⏳ ',x.name,'<button '+B('#1f9d55')+' onclick="admit(\''+k+'\')">قبول</button><button '+B('#e5484d')+' onclick="deny(\''+k+'\')">رفض</button>')).join(''):'')+
   '<button class="m" style="background:#6c5ce7;color:#fff;text-align:center" onclick="tMuteAll()">'+(allMuted?'🎤 إلغاء كتم الجميع':'🔇 كتم صوت جميع الطلاب')+'</button>'+
   '<button class="m" style="background:#2c2f3e;color:#fff;text-align:center" onclick="tCamBan()">'+(camBanAll?'📷 السماح بكاميرات الطلاب':'🚫 منع كاميرات الطلاب')+'</button>'+
   (A.map(([k,x])=>row(stIc(x),x.name,'<button '+B('#6c5ce7')+' onclick="allow(\''+k+'\')">'+(x.can?'كتم':'إلغاء الكتم')+'</button><button '+B('#2c2f3e')+' title="كاميرا الطالب" onclick="camAllow(\''+k+'\')">'+(x.cp?'📷':'🚫')+'</button><button '+B('#2c2f3e')+' title="'+T('pm')+'" onclick="pmOpen(\''+k+'\')">💬'+(pmU[k]?' '+pmU[k]:'')+'</button><button '+B('#2c2f3e')+' title="🔔" onclick="nudge(\''+k+'\')">🔔</button><button '+B('#2c2f3e')+' title="⭐" onclick="stkPick(\''+k+'\')">⭐</button><button '+B('#e5484d')+' onclick="deny(\''+k+'\',1)">طرد</button>')).join('')||'<div class="m s">لا يوجد طلاب متصلون</div>')}
- else{const arr=tab=='stu'?stu:hd;L.innerHTML=arr.map(n=>'<div class="m">'+(tab=='hand'?'✋ ':'🟢 ')+esc(n)+'</div>').join('')||'<div class="m s">'+(tab=='stu'?'لا يوجد طلاب متصلون':'لا توجد أيدٍ مرفوعة')+'</div>'}
+ else{const arr=tab=='stu'?stu:hd;L.innerHTML=arr.map(n=>'<div class="m">'+(tab=='hand'?'✋ ':'🟢 ')+U(n)+'</div>').join('')||'<div class="m s">'+(tab=='stu'?'لا يوجد طلاب متصلون':'لا توجد أيدٍ مرفوعة')+'</div>'}
  if(tab=='chat')L.scrollTop=L.scrollHeight;
 }
 function ui(){
@@ -550,8 +560,8 @@ function ui(){
  const w=$('#wb');w.hidden=!st.wb;w.classList.toggle('bg',!!st.bg);if(st.wb)fit();
  {const tv=!!(st.wb&&role=='t'),tb=$('#tb');tb.hidden=!tv;if(tv){if(!FP.tb){const q=$('#stage').getBoundingClientRect();FP.tb={fx:(q.left+58)/innerWidth,fy:(q.top+10)/innerHeight};FE.tb=tb}place(tb,'tb')}}
  layoutCams();
- $('#bm').classList.toggle('off',role=='t'?!st.mic:!(micS&&micS.enabled));$('#bm').style.opacity=(role=='s'&&!canTalk)?.35:1;$('#bc').classList.toggle('off',role=='t'?!st.cam:!camS);$('#bc').style.opacity=(role=='s'&&!canCam)?.35:1;
- $('#bs').classList.toggle('on',!!st.scr);$('#bh').classList.toggle('on',!!myHand);
+ $('#bm').classList.toggle('lt',role=='t'?!!st.mic:!!(micS&&micS.enabled));$('#bm').style.opacity=(role=='s'&&!canTalk)?.35:1;$('#bc').classList.toggle('lt',role=='t'?!!st.cam:!!camS);$('#bc').style.opacity=(role=='s'&&!canCam)?.35:1;
+ $('#bs').classList.toggle('lt',!!st.scr);$('#bt').classList.toggle('lt',role=='t'&&!!st.wb);$('#bh').classList.toggle('on',!!myHand);
  $('#tl').classList.toggle('on',!!allMuted);$('#tr').classList.toggle('on',!!rec);
  $('#tp').classList.toggle('on',!!poll);$('#tw').classList.toggle('on',!!st.wb);
  const i=$('#ci');if(role=='s'){i.disabled=!!st.lock;i.placeholder=st.lock?'الشات مقفول من المعلم':'اكتب للمعلم...'};sendMs()
@@ -674,7 +684,7 @@ function buildTb(){const t=$('#tb');t.innerHTML='';
  COLS.forEach(c=>{const b=B('','لون',()=>{col=c;refTb()},'sw');b.style.background=c;b.dataset.col=c});SP();
  ['#ffe600','#7CFC00','#ff7ad9','#4cc9ff'].forEach(c=>{const b=B('','هايلايتر',()=>{hcol=c;tool='hl';refTb()},'sw');b.style.background=c;b.style.borderRadius='4px';b.dataset.hc=c});SP();
  [[2,'رفيع'],[5,'متوسط'],[10,'سميك']].forEach(([w,ti])=>{B('<i style="display:block;border-radius:9px;background:#fff;width:20px;height:'+Math.max(2,w*.8)+'px"></i>',ti,()=>{wd=w;refTb()}).dataset.w=w});SP();
- B('↩','تراجع',undo);B('🗑','مسح الكل',wclr);B('◐','خلفية: بيضاء / شفافة',tBg);B('▦',T('bgs'),function(){bgMenu(this)});refTb()}
+ B('↩','تراجع',undo);B('🗑','مسح الكل',wclr);B('◐','خلفية: بيضاء / شفافة',tBg);B('▦',T('bgs'),function(){bgMenu(this)});SP();B('🧮',T('calc'),()=>calcT());B('📈',T('desmos'),()=>dsmT());refTb()}
 function refTb(){document.querySelectorAll('#tb [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool==tool));
  document.querySelectorAll('#tb [data-col]').forEach(b=>b.classList.toggle('on',b.dataset.col==col));
  document.querySelectorAll('#tb [data-hc]').forEach(b=>b.classList.toggle('on',tool=='hl'&&b.dataset.hc==hcol));
@@ -785,11 +795,11 @@ function setLang(l){LANG=I18[l]?l:'ar';try{localStorage.setItem('itqan_lang',LAN
  document.querySelectorAll('[data-i18n-t]').forEach(e=>{e.title=T(e.dataset.i18nT);e.setAttribute('aria-label',e.title)});
  document.querySelectorAll('[data-i18n-p]').forEach(e=>e.placeholder=T(e.dataset.i18nP));
  ['lgb','lgb2'].forEach(i=>{const b=document.getElementById(i);if(b)b.textContent=LANG=='ar'?'English':'العربية'});
- stkRender();calcUi();try{pmRender()}catch(e){}}
+ stkRender();calcUi();try{pmRender()}catch(e){}try{trAll()}catch(e){}}
 function toggleLang(){setLang(LANG=='ar'?'en':'ar')}
 /* ===== تنبيه + استيكرز (تُرسل عبر قناة البيانات الحقيقية للطالب المحدد فقط) ===== */
 let lastN={},lastS=0,stkTo='',lastA2=0,tt;
-function toast(e,m,x){const t=$('#toast');t.textContent='';const a=document.createElement('div');a.className='e';a.textContent=e;const b=document.createElement('div');b.textContent=m;t.append(a,b);if(x){const c=document.createElement('div');c.style.cssText='font-size:16px;opacity:.9;margin-top:4px';c.textContent=x;t.append(c)}t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,4000)}
+function toast(e,m,x){const t=$('#toast');t.textContent='';const a=document.createElement('div');a.className='e';a.textContent=e;const b=document.createElement('div');b.textContent=m;t.append(a,b);if(x){const c=document.createElement('div');c.style.cssText='font-size:16px;opacity:.9;margin-top:4px';c.setAttribute('translate','no');c.textContent=x;t.append(c)}t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,4000)}
 function nudge(k){if(role!='t')return;const o=conns[k];if(!o||!o.adm)return sys(T('fail'));const n=Date.now();if(n-(lastN[k]||0)<5000)return sys(T('flood'));lastN[k]=n;try{o.c.send({t:'att'});sys(T('nudged')+o.name)}catch(e){sys(T('fail'))}}
 function attn(){const n=Date.now();if(n-lastA2<3000)return;lastA2=n;toast('🔔',T('attn'));try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
 function stkRender(){const g=$('#stkg');if(!g)return;g.textContent='';STK.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s[0]+' '+(LANG=='ar'?s[2]:s[1]);b.onclick=()=>stkSend(i);g.append(b)});
@@ -855,7 +865,7 @@ function pmOpen(k){if(role=='t'){if(!conns[k])return;pmK=k;pmU[k]=0;render()}els
 function pmRender(){if(!role||!$('#pml'))return;const t=role=='t',o=t?conns[pmK]:null,l=$('#pml'),a=t?(pmT[pmK]||[]):pmS;
  $('#pmt').textContent=T('pmPrivate')+' — '+(t?(o?o.name:''):T('teacher'));l.textContent='';
  if(!a.length){const d=document.createElement('div');d.className='m s';d.textContent=T('pmNone');l.append(d)}
- a.forEach(e=>{const d=document.createElement('div');d.className='pb'+(e.f?' me':'');d.dir='auto';d.textContent=e.m;const s=document.createElement('small');s.textContent=pmTime(e.ts)+(e.f?(e.a?' ✓✓':' ✓'):'');d.append(s);l.append(d)});l.scrollTop=l.scrollHeight}
+ a.forEach(e=>{const d=document.createElement('div');d.className='pb'+(e.f?' me':'');d.dir='auto';d.setAttribute('translate','no');d.textContent=e.m;const s=document.createElement('small');s.textContent=pmTime(e.ts)+(e.f?(e.a?' ✓✓':' ✓'):'');d.append(s);l.append(d)});l.scrollTop=l.scrollHeight}
 function pmSend(){const i=$('#pmi'),m=i.value.trim().slice(0,500);if(!m||!role)return;const n=Date.now(),e={f:1,m,ts:n,a:0};
  try{if(role=='t'){const o=conns[pmK];if(!o||!o.adm)return sys(T('fail'));o.c.send({t:'pm',m,ts:n});(pmT[pmK]=pmT[pmK]||[]).push(e)}
   else{if(n-pmL<700)return;if(!(conn&&conn.open&&admitted))return sys(T('fail'));pmL=n;conn.send({t:'pm',m,ts:n});pmS.push(e)}}catch(x){return sys(T('fail'))}
@@ -868,8 +878,8 @@ function pmGotS(d){const m=String(d.m).slice(0,500);pmS.push({f:0,m,ts:Date.now(
 $('#pmi').addEventListener('keydown',e=>{e.stopPropagation();if(e.key=='Enter'){e.preventDefault();pmSend()}});
 Object.assign(I18.ar,{micOn:'الميكروفون مفتوح',micOff:'الميكروفون مقفول',micLock:'مكتوم من المعلم',camOn:'الكاميرا مفتوحة',camOff:'الكاميرا مقفولة',rec:'تسجيل الحصة على جهازك',recWarn:'سيتم تسجيل ما يظهر لك من بث المعلم وصوت الحصة والسبورة وحفظه على جهازك فقط. لن يُسجَّل ميكروفونك أو كاميرتك. قد يتضمن التسجيل صوت من يتحدث في الحصة. هل تريد البدء؟',recNo:'متصفحك لا يدعم التسجيل. جرّب Chrome أو Edge على الكمبيوتر.',desmos:'حاسبة Desmos البيانية',dsmNoKey:'لتفعيل Desmos: احصل على مفتاح API مجاني من desmos.com/my-api ثم ضعه في المتغير DESMOS_KEY في أول الكود.',dsmLoading:'جارٍ تحميل Desmos...',dsmFail:'تعذر تحميل Desmos — تأكد من الإنترنت ومن صحة مفتاح API.'});
 Object.assign(I18.en,{micOn:'Microphone on',micOff:'Microphone off',micLock:'Muted by teacher',camOn:'Camera on',camOff:'Camera off',rec:'Record the lesson on your device',recWarn:'This records what you see of the teacher’s stream, the lesson audio and the whiteboard, saved only on your device. Your own microphone and camera are not recorded. The recording may include anyone speaking in the lesson. Start recording?',recNo:'Your browser does not support recording. Try Chrome or Edge on a computer.',desmos:'Desmos graphing calculator',dsmNoKey:'To enable Desmos: get a free API key from desmos.com/my-api and put it in the DESMOS_KEY variable at the top of the code.',dsmLoading:'Loading Desmos...',dsmFail:'Could not load Desmos — check your connection and API key.'});
-function stIc(x){const m=!x.can?['🔒',T('micLock'),0]:x.mic?['🎤',T('micOn'),1]:['🔇',T('micOff'),0],c=(x.cp===0||!x.cam)?['🚫',T('camOff'),0]:['📷',T('camOn'),1];
- return [m,c].map(a=>'<span title="'+a[1]+'" style="background:'+(a[2]?'#1f9d55':'#4a4d5e')+';border-radius:6px;padding:0 3px;margin-inline-end:3px">'+a[0]+'</span>').join('')+' '}
+function stIc(x){const mo=x.can&&x.mic,co=x.cp!==0&&x.cam;
+ return '<span class="ic'+(mo?' lt':'')+'" title="'+(!x.can?T('micLock'):mo?T('micOn'):T('micOff'))+'">🎤</span><span class="ic'+(co?' lt':'')+'" title="'+(co?T('camOn'):T('camOff'))+'">📷</span> '}
 let lastMs='',lastMsC=null;
 function sendMs(){if(role!='s'||!admitted||!conn||!conn.open)return;const m=(micS&&micS.enabled&&myCall&&canTalk)?1:0,c=camS?1:0,k=m+''+c;if(k===lastMs&&conn===lastMsC)return;lastMs=k;lastMsC=conn;try{conn.send({t:'ms',m,c})}catch(e){}}
 setInterval(()=>{const b=[$('#tr'),$('#brc')];if(rec){rec.t0=rec.t0||Date.now();const q=Math.floor((Date.now()-rec.t0)/1000),t='⏺ '+String(Math.floor(q/60)).padStart(2,'0')+':'+String(q%60).padStart(2,'0');b.forEach(x=>{if(x){x.textContent=t;x.classList.add('on')}})}else b.forEach(x=>{if(x){x.textContent='⏺';x.classList.remove('on')}})},1000);
@@ -887,6 +897,274 @@ function dsmInit(){if(dsmC){try{dsmC.resize()}catch(e){}return}
  const sc=document.createElement('script');sc.src='https://www.desmos.com/api/v1.12/calculator.js?apiKey='+encodeURIComponent(DESMOS_KEY);
  sc.onload=()=>{dsmLoad=0;dsmMake()};sc.onerror=()=>{dsmLoad=0;sc.remove();dsmMsg(T('dsmFail'))};document.head.append(sc)}
 function dsmMake(){try{const b=$('#dsb');b.textContent='';dsmC=Desmos.GraphingCalculator(b,{keypad:true,expressions:true})}catch(e){dsmMsg(T('dsmFail'))}}
+Object.assign(I18.ar,{tools:'الأدوات (السبورة والحاسبات)',timer:'مدة الحصة',wbOpen:'فتح السبورة',wbClose:'إغلاق السبورة',mailOff:'⚠️ إشعارات الإيميل غير مفعّلة — أضف إعدادات EmailJS في المتغير MAIL أعلى الكود'});
+Object.assign(I18.en,{tools:'Tools (whiteboard & calculators)',timer:'Lesson duration',wbOpen:'Open whiteboard',wbClose:'Close whiteboard',mailOff:'⚠️ Email notifications are off — add your EmailJS settings to the MAIL variable at the top of the code'});
+/* ===== مؤقت الحصة ===== */
+let sessT0=0;
+const fmtT=ms=>{const q=Math.floor(ms/1000),h=Math.floor(q/3600),m=Math.floor(q%3600/60),x=q%60,p=n=>String(n).padStart(2,'0');return(h?h+':':'')+p(m)+':'+p(x)};
+setInterval(()=>{if(sessT0)$('#tmr').textContent='⏱ '+fmtT(Date.now()-sessT0)},1000);
+/* ===== قائمة الأدوات الموحدة ===== */
+function toolsMenu(btn){if(role=='t'){tWb();return}
+ let m=$('#tlm');if(m&&!m.hidden){m.hidden=true;return}
+ if(!m){m=document.createElement('div');m.id='tlm';document.body.append(m)}m.textContent='';
+ [['🧮',T('calc'),()=>calcT()],['📈',T('desmos'),()=>dsmT()]].forEach(([ic,tx,fn])=>{const b=document.createElement('button');b.textContent=ic+' '+tx;b.onclick=()=>{m.hidden=true;fn()};m.append(b)});
+ const r=btn.getBoundingClientRect();m.style.left=Math.max(6,Math.min(r.left,innerWidth-216))+'px';m.style.bottom=(innerHeight-r.top+8)+'px';m.style.top='auto';m.hidden=false}
+document.addEventListener('click',e=>{['tlm','bgm'].forEach(id=>{const m=document.getElementById(id);if(m&&!m.hidden&&!m.contains(e.target)&&!e.target.closest('#bt')&&!(id=='bgm'&&e.target.closest('#tb')))m.hidden=true})});
+/* ===== إشعارات الإيميل عبر EmailJS (emailjs.com — حساب مجاني، اربطه بجيميل الأكاديمية) =====
+   قالب EmailJS: To Email = {{to_email}} ، Subject = {{subject}} ، المحتوى = {{message}} */
+const MAIL={service:'',template:'',key:'',to:'itqanacademy.alex@gmail.com'};
+let mailQ=[],mailTm=0,mailNames=new Set(),mailDone=0;
+function mailSend(sub,msg,keep){if(!(MAIL.service&&MAIL.template&&MAIL.key))return;
+ try{fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:!!keep,body:JSON.stringify({service_id:MAIL.service,template_id:MAIL.template,user_id:MAIL.key,template_params:{to_email:MAIL.to,subject:sub,message:msg,room:roomName}})}).catch(()=>{})}catch(e){}}
+const mailNow=()=>new Date().toLocaleString('ar-EG');
+function mailTeacherIn(){if(!(MAIL.service&&MAIL.template&&MAIL.key))return sys(T('mailOff'));mailSend('👨‍🏫 دخل المعلم الغرفة '+roomName,'دخل المعلم ('+name+') إلى الغرفة: '+roomName+'\nالوقت: '+mailNow())}
+function mailStu(n){mailNames.add(n);mailQ.push(n);clearTimeout(mailTm);mailTm=setTimeout(mailFlush,60000)}
+function mailFlush(keep){clearTimeout(mailTm);if(!mailQ.length)return;const q=mailQ.splice(0);mailSend('🎓 دخل '+q.length+' طالب الغرفة '+roomName,'دخل الطلاب التالية أسماؤهم:\n- '+q.join('\n- ')+'\nالوقت: '+mailNow(),keep)}
+function mailEnd(keep){if(role!='t'||mailDone||!sessT0)return;mailDone=1;mailFlush(keep);const mn=Math.round((Date.now()-sessT0)/60000);
+ mailSend('⏱ انتهت الحصة '+roomName+' — '+(mn?mn+' دقيقة':'أقل من دقيقة'),'انتهت الحصة في الغرفة: '+roomName+'\nالمدة: '+(mn?mn+' دقيقة':'أقل من دقيقة')+'\nعدد الطلاب الذين دخلوا: '+mailNames.size+(mailNames.size?'\nالأسماء: '+[...mailNames].join('، '):'')+'\nانتهت في: '+mailNow(),keep)}
+window.addEventListener('pagehide',()=>mailEnd(1));
+Object.assign(I18.ar,{board:'السبورة',fsNo:'ملء الشاشة غير متاح هنا (متصفح الموبايل أو إطار مدمج) — افتح الصفحة مباشرة في Chrome أو Edge.'});
+Object.assign(I18.en,{board:'Whiteboard',fsNo:'Full screen is not available here (mobile browser or embedded frame) — open the page directly in Chrome or Edge.'});
+/* ===== ملء الشاشة ===== */
+function fsToggle(){const d=document,el=d.body,on=d.fullscreenElement||d.webkitFullscreenElement;
+ if(on){(d.exitFullscreen||d.webkitExitFullscreen).call(d);return}
+ const rq=el.requestFullscreen||el.webkitRequestFullscreen,en=d.fullscreenEnabled!==undefined?d.fullscreenEnabled:d.webkitFullscreenEnabled;
+ if(!rq||en===false)return alert(T('fsNo'));
+ try{const p=rq.call(el);if(p&&p.catch)p.catch(()=>alert(T('fsNo')))}catch(e){alert(T('fsNo'))}}
+if(!('onfullscreenchange' in document))document.addEventListener('webkitfullscreenchange',()=>document.dispatchEvent(new Event('fullscreenchange')));
+document.addEventListener('fullscreenchange',()=>{const b=$('#fs');if(b)b.textContent=(document.fullscreenElement||document.webkitFullscreenElement)?'🗗':'⛶'});
+/* ===== ترجمة كاملة للواجهة (عربي ⇄ English): نصوص التطبيق فقط — أسماء وكتابات المستخدمين محمية بـ translate=no ===== */
+const ENM=[
+["الفصل الافتراضي","Virtual Classroom"],
+["أكاديمية إتقان","Itqan Academy"],
+["غرفة فصل افتراضي — بث مباشر","Virtual classroom — live streaming"],
+["مباشر","Live"],
+["اسمك","Your name"],
+["رمز الغرفة (المعلم: اتركه فارغاً لإنشاء غرفة جديدة)","Room code (teacher: leave empty to create a new room)"],
+["دخول كمعلم","Join as teacher"],
+["دخول كطالب","Join as student"],
+["الميكروفون مطلوب","Microphone required"],
+["تشغيل الميكروفون الآن","Turn on the microphone now"],
+["المتابعة بدون ميكروفون (استماع فقط)","Continue without microphone (listen only)"],
+["رجوع","Back"],
+["تم","Done"],
+["مدة الحصة","Lesson duration"],
+["ملخص الحصة بالذكاء الاصطناعي","AI lesson summary"],
+["ملخص الحصة","Lesson summary"],
+["صوت","Audio"],
+["الكاميرا مقفولة — ","Camera off — "],
+["الصوت شغّال","Audio on"],
+["الصوت مكتوم","Audio muted"],
+["تصغير الكاميرا","Shrink camera"],
+["ملء الشاشة","Full screen"],
+["اضغط لتفعيل الصوت","Tap to enable sound"],
+["الأدوات (السبورة والحاسبات)","Tools (calculators)"],
+["الأدوات","Tools"],
+["رفع اليد","Raise hand"],
+["رسالة خاصة","Private message"],
+["تسجيل الحصة على جهازك","Record the lesson on your device"],
+["تسجيل الحصة","Record lesson"],
+["الحاسبة العلمية","Scientific calculator"],
+["إنهاء","End"],
+["كتم صوت جميع الطلاب","Mute all students"],
+["الطلاب","Students"],
+["الطالب","Student"],
+["استفتاء سريع","Quick poll"],
+["السبورة","Whiteboard"],
+["استيكر للجميع","Sticker for everyone"],
+["دعوة الطلاب (نسخ/مشاركة الرابط)","Invite students (copy/share link)"],
+["تحديث الاتصال","Refresh connection"],
+["الشات","Chat"],
+["اليد المرفوعة","Raised hands"],
+["اكتب للطلاب...","Write to students..."],
+["اكتب للمعلم...","Write to the teacher..."],
+["الشات مقفول من المعلم","Chat is locked by the teacher"],
+["مصادر الملخص","Summary sources"],
+["الحضور","Attendance"],
+["بدء التفريغ الصوتي","Start transcription"],
+["إيقاف التفريغ الصوتي","Stop transcription"],
+["التفريغ الصوتي","Speech transcript"],
+["عربي (مصر)","Arabic (Egypt)"],
+["عربي (السعودية)","Arabic (Saudi Arabia)"],
+["التفريغ الصوتي يسجّل كلامك أنت فقط (ميكروفون المعلم) ويعمل في Chrome وEdge على الكمبيوتر.","Transcription captures only your own speech (teacher microphone) and works in Chrome and Edge on desktop."],
+["ملاحظات إضافية أو نص الحصة (اختياري)","Extra notes or lesson text (optional)"],
+["خدمة الذكاء الاصطناعي","AI service"],
+["مفتاح مجاني من AI Studio","free key from AI Studio"],
+["سكريبت خاص (رابط Webhook)","Custom script (Webhook URL)"],
+["اسم النموذج","Model name"],
+["المفتاح يُحفظ في متصفحك أنت فقط ولا يُرسل إلا للخدمة التي تختارها. بيانات الحصة (الشات والتفريغ) ستُرسل لهذه الخدمة، فأخبر الطلاب بذلك.","The key is saved only in your browser and sent only to the service you choose. Lesson data (chat and transcript) will be sent to that service, so inform the students."],
+["إنشاء الملخص","Generate summary"],
+["سيظهر الملخص هنا...","The summary will appear here..."],
+["تنزيل","Download"],
+["إرسال للطلاب في الشات","Send to students in chat"],
+["إرسال","Send"],
+["الإصدار","Version"],
+["رفض المتصفح الإذن","Browser denied permission"],
+["لا يوجد ميكروفون","No microphone found"],
+["الميكروفون مستخدم من تطبيق آخر","The microphone is used by another app"],
+["غير مدعوم هنا","Not supported here"],
+["الصفحة داخل إطار مدمج — افتح رابط الصفحة مباشرة في Safari/Chrome","The page is inside an embedded frame — open the page link directly in Safari/Chrome"],
+["افتح الملف من رابط استضافة https حقيقي بدل النافذة المؤقتة","Open the file from a real https hosting link instead of the temporary window"],
+["أنت داخل متصفح تطبيق — افتح الرابط في Safari/Chrome","You are inside an in-app browser — open the link in Safari/Chrome"],
+["الصفحة ليست على https","The page is not on https"],
+["اسمح بالميكروفون من إعدادات الموقع","Allow the microphone from the site settings"],
+["زر aA في شريط عنوان","aA button in the address bar of"],
+["إعدادات الموقع","Site settings"],
+["تعذر تشغيل","Could not turn on"],
+["ما زال بإمكانك سماع الدرس.","You can still hear the lesson."],
+["كاميرات الطلاب","Student cameras"],["الكاميرات","cameras"],
+["الكاميرا","camera"],
+["الميكروفون","microphone"],
+["مشاركة الشاشة","Share screen"],
+["تم نسخ رابط الدعوة: ","Invite link copied: "],
+["تم نسخ رمز الغرفة (الطالب يكتبه في خانة الرمز): ","Room code copied (the student types it in the code field): "],
+["انسخ من هنا:","Copy from here:"],
+["تعذر تحميل مكتبة الاتصال — تأكد من الإنترنت","Could not load the connection library — check your internet"],
+["اكتب رمز الغرفة، أو افتح رابط الدعوة اللي بعته المعلم","Enter the room code, or open the invite link sent by the teacher"],
+["الغرفة: ","Room: "],
+["شارك هذا الرمز مع الطلاب","share this code with the students"],
+["رابط الدعوة: ","Invite link: "],
+["رمز الغرفة: ","Room code: "],
+["أو زر","or the"],
+["للمشاركة","button to share"],
+["الإصدار","Version"],
+["لم يتم ضبط خادم TURN — طلاب الشبكات المختلفة (خصوصاً الموبايل) قد لا يتمكنون من الاتصال. راجع","TURN server is not configured — students on different networks (especially mobile) may be unable to connect. See"],
+["أعلى الكود.","the top of the code."],
+["الغرفة جاهزة ويمكن للطلاب الدخول","The room is ready and students can join"],
+["انقطع الاتصال بخادم الغرف — جارٍ إعادة الاتصال تلقائياً","Disconnected from the room server — reconnecting automatically"],
+["الرمز لسه محجوز (غالباً من جلسة سابقة) — محاولة","The code is still reserved (probably from a previous session) — attempt"],
+["من 6...","of 6..."],
+["هذه الغرفة مفتوحة بالفعل عند معلم آخر — غيّر الرمز","This room is already open with another teacher — change the code"],
+["مشكلة في الوصول لخادم الغرف","Problem reaching the room server"],
+["سنعيد المحاولة تلقائياً","we will retry automatically"],
+["خطأ في الاتصال","Connection error"],
+["الغرفة مقفلة حالياً","The room is currently locked"],
+["مقفلة","Locked"],
+["ينتظر الدخول — افتح تبويب «الطلاب» للقبول","is waiting to enter — open the “Students” tab to accept"],
+["قبول الجميع","Accept all"],
+["قبول","Accept"],
+["تم منع كاميرات الطلاب","Student cameras were disabled"],
+["تم السماح بكاميرات الطلاب","Student cameras were enabled"],
+["السماح بكاميرات الطلاب","Allow student cameras"],
+["منع كاميرات الطلاب","Block student cameras"],
+["وضع الدخول","Entry mode"],
+["بموافقة المعلم","With teacher approval"],
+["بموافقتي","With my approval"],
+["مقفلة (لا يدخل أحد)","Locked (nobody enters)"],
+["تلقائي","Automatic"],
+["تم كتم صوت جميع الطلاب","All students were muted"],
+["تم إلغاء كتم الطلاب","Students were unmuted"],
+["إلغاء كتم الجميع","Unmute all"],
+["إلغاء الكتم","Unmute"],
+["كتم","Mute"],
+["تعذر وصول","Could not reach"],
+["للمعلم (حالة الاتصال","the teacher (connection state"],
+["جرّب شبكة أخرى، أو افتح الرابط مباشرة في Chrome/Safari","Try another network, or open the link directly in Chrome/Safari"],
+["أوقف المعلم كاميرات الطلاب حالياً","The teacher has disabled student cameras"],
+["تم تشغيل الكاميرا وإرسالها للمعلم","Camera turned on and sent to the teacher"],
+["كتم المعلم ميكروفونك","The teacher muted your microphone"],
+["توقف الميكروفون (ربما استخدمه تطبيق آخر) — اضغط 🎤 لإعادة تشغيله","The microphone stopped (maybe another app used it) — press 🎤 to restart it"],
+["توقف ميكروفون المعلم — اضغط 🎤 لإعادة تشغيله","The teacher microphone stopped — press 🎤 to restart it"],
+["اضغط 🎤 لتشغيل الميكروفون","Press 🎤 to turn on the microphone"],
+["تعذر الوصول للكاميرا","Could not access the camera"],
+["تعذرت مشاركة الشاشة — افتح الصفحة مباشرة في Chrome أو Edge","Screen sharing failed — open the page directly in Chrome or Edge"],
+["مشاركة الشاشة غير مدعومة في متصفح الموبايل — استخدم كمبيوتر","Screen sharing is not supported on mobile browsers — use a computer"],
+["نتيجة الاستفتاء","Poll result"],
+["سؤال الاستفتاء (نعم / لا / ربما):","Poll question (yes / no / maybe):"],
+["بدأ الاستفتاء — اضغط","Poll started — press"],
+["مرة أخرى لإنهائه وعرض النتيجة","again to end it and show the result"],
+["تم حفظ التسجيل على جهازك","The recording was saved to your device"],
+["بدأ تسجيل الحصة","Lesson recording started"],
+["الغرفة مغلقة — لم يفتحها المعلم بعد. ستدخل تلقائياً بمجرد فتحها.","The room is closed — the teacher has not opened it yet. You will enter automatically once it opens."],
+["الاتصال بالغرفة بطيء — جارٍ إعادة المحاولة...","Connection to the room is slow — retrying..."],
+["لو تكرر الأمر جرّب شبكة أخرى","if this repeats, try another network"],
+["انقطع الاتصال بالمعلم","Disconnected from the teacher"],
+["جارٍ الاتصال بالغرفة...","Connecting to the room..."],
+["مشكلة في الوصول لخادم الغرف — جارٍ إعادة المحاولة...","Problem reaching the room server — retrying..."],
+["وصل البث مع الصوت","Stream received with audio"],
+["وصل البث بدون صوت — ميكروفون المعلم غير مفعّل أو مكتوم","Stream received without audio — the teacher microphone is off or muted"],
+["أنت في غرفة الانتظار — سيسمح لك المعلم بالدخول قريباً","You are in the waiting room — the teacher will let you in shortly"],
+["في غرفة الانتظار","In the waiting room"],
+["أخرجك المعلم من الحصة","The teacher removed you from the lesson"],
+["رفض المعلم دخولك","The teacher declined your entry"],
+["يمكنك الآن التحدث","You can speak now"],
+["يمكنك فتح الكاميرا","You can turn on the camera"],
+["تم تسجيل إجابتك","Your answer was recorded"],
+["تمت مزامنة الاتصال","Connection synced"],
+["جارٍ إعادة الاتصال...","Reconnecting..."],
+["هل تريد إنشاء ملخص الحصة بالذكاء الاصطناعي قبل الإغلاق؟","Do you want to create an AI lesson summary before closing?"],
+["إنهاء الحصة للجميع؟","End the lesson for everyone?"],
+["مغادرة الحصة؟","Leave the lesson?"],
+["الشات والواجهة","Chat and interface"],
+["لا توجد رسائل بعد","No messages yet"],
+["كاميرا الطالب","Student camera"],
+["طرد","Remove"],
+["لا يوجد طلاب متصلون","No students connected"],
+["لا توجد أيدٍ مرفوعة","No raised hands"],
+["لون","Color"],
+["التقاط المسطرة والمنقلة","Snap to ruler and protractor"],
+["مسطرة","Ruler"],
+["منقلة","Protractor"],
+["تحريك الأدوات","Move tools"],
+["شريط الأدوات","Toolbar"],
+["اسحب لتحريك الشريط (يمكن وضعه خارج السبورة)","Drag to move the toolbar (can be placed outside the board)"],
+["قلم","Pen"],
+["ممحاة (مساحة)","Eraser"],
+["خط مستقيم","Straight line"],
+["سهم","Arrow"],
+["مستطيل","Rectangle"],
+["دائرة","Circle"],
+["شكل بيضاوي","Ellipse"],
+["مثلث قائم","Right triangle"],
+["مثلث","Triangle"],
+["سداسي","Hexagon"],
+["برجل (اسحب لتحديد نصف القطر ثم ارسم القوس)","Compass (drag to set the radius, then draw the arc)"],
+["هايلايتر (تمييز شبه شفاف)","Highlighter (semi-transparent)"],
+["هايلايتر","Highlighter"],
+["تحريك المسطرة والمنقلة","Move ruler and protractor"],
+["رفيع","Thin"],
+["متوسط","Medium"],
+["سميك","Thick"],
+["تراجع","Undo"],
+["مسح الكل","Clear all"],
+["خلفية: بيضاء / شفافة","Background: white / transparent"],
+["عناصر عائمة: الكاميرات وشريط الأدوات","Floating items: cameras and toolbar"],
+["تكبير / تصغير","Zoom in / out"],
+["هذا المتصفح لا يدعم التفريغ الصوتي — استخدم Chrome أو Edge على الكمبيوتر، أو اكتب ملاحظاتك في الخانة","This browser does not support speech transcription — use Chrome or Edge on a computer, or type your notes in the box"],
+["لم يُسمح بالتفريغ الصوتي — اسمح بالميكروفون للموقع","Transcription was not allowed — allow the microphone for the site"],
+["لا توجد بيانات للتلخيص بعد — شغّل التفريغ الصوتي أو اكتب ملاحظات","No data to summarize yet — start transcription or type notes"],
+["أدخل رابط السكريبت (يبدأ بـ https)","Enter the script link (starts with https)"],
+["أدخل مفتاح","Enter the key"],
+["أدخل اسم النموذج","Enter the model name"],
+["جارٍ إنشاء الملخص...","Generating the summary..."],
+["تعذر إنشاء الملخص","Could not generate the summary"],
+["تم النسخ","Copied"],
+["أُرسل للطلاب","Sent to students"],
+["تنبيه","Alert"],
+["نعم","Yes"],
+["لا","No"],
+["ربما","Maybe"],
+["أنت","You"],
+["المعلم","Teacher"],
+["خرج","left"],
+["دخل","joined"],
+["كتم المعلم ميكروفونك","The teacher muted your microphone"],
+["اكتب رسالة خاصة...","Type a private message..."]
+];
+const EX={},SB=[];ENM.forEach(([a,e])=>{if(a.length<6&&!/\s/.test(a)&&a!=='الشات')EX[a]=e;else SB.push([a,e])});SB.sort((x,y)=>y[0].length-x[0].length);
+function LT(s){if(LANG!='en')return s;s=String(s);const t=s.trim();if(Object.prototype.hasOwnProperty.call(EX,t))return s.replace(t,EX[t]);let r=s;for(const[a,e]of SB)if(r.indexOf(a)>-1)r=r.split(a).join(e);return r}
+const _al=window.alert.bind(window),_cf=window.confirm.bind(window),_pr=window.prompt.bind(window);
+window.alert=m=>_al(LT(m));window.confirm=m=>_cf(LT(m));window.prompt=(m,d)=>_pr(LT(m),d);
+const TXR=new WeakMap(),ARB=/[\u0600-\u06FF]/,ATT=['title','placeholder','aria-label'],TT0=document.title;
+function trText(n){const p=n.parentElement;if(!p||p.closest('[translate=no],script,style'))return;const r=TXR.get(n);let src;
+ if(r&&r.t===n.data)src=r.a;else{src=n.data;if(!ARB.test(src)){TXR.delete(n);return}}
+ const out=LANG=='en'?LT(src):src;if(out!==n.data)n.data=out;TXR.set(n,{a:src,t:out})}
+function trAttr(el){if(el.closest&&el.closest('[translate=no]'))return;const m=el.__ta||(el.__ta={});
+ ATT.forEach(a=>{const v=el.getAttribute(a);if(v==null)return;const r=m[a];let src;if(r&&r.t===v)src=r.a;else{src=v;if(!ARB.test(src)){delete m[a];return}}
+  const out=LANG=='en'?LT(src):src;if(out!==v)el.setAttribute(a,out);m[a]={a:src,t:out}})}
+function trTree(root){if(root.nodeType==3)return trText(root);if(root.nodeType!=1)return;trAttr(root);const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);let n=w.nextNode();while(n){n.nodeType==3?trText(n):trAttr(n);n=w.nextNode()}}
+function trAll(){trTree(document.body);document.title=LANG=='en'?LT(TT0):TT0}
+new MutationObserver(ms=>{if(LANG!='en')return;ms.forEach(m=>{if(m.type=='characterData')trText(m.target);else if(m.type=='attributes')trAttr(m.target);else m.addedNodes.forEach(trTree)})}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATT});
 try{setLang(localStorage.getItem('itqan_lang')||'ar')}catch(e){setLang('ar')}
 </script>
 </body>
