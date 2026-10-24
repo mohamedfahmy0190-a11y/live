@@ -308,7 +308,7 @@ const dummy=dcv.captureStream(5).getVideoTracks()[0],A=new Audio(),MOB=/Android|
 document.addEventListener('pointerdown',()=>{if(A.srcObject&&A.paused)A.play().then(()=>$('#unm').hidden=true).catch(()=>{})});
 
 /* ===== هوية الجلسة (مفاتيح تشفير) ===== */
-const SEC_PIN='';  /* اختياري: كلمة مرور لفتح لوحة السكرتارية (تمنع الاستخدام العرضي فقط) */
+const SEC_HASH='4f8d493a1e7a0d267069b9a22f50fd0d3954128b1827024f68d356e9142da19e'; /* بصمة (PBKDF2) لكلمة سر السكرتارية — لتغييرها اطلب إعادة توليدها */
 const ALG={name:'ECDSA',namedCurve:'P-256'},SG={name:'ECDSA',hash:'SHA-256'};
 const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const ub64=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Uint8Array.from(atob(s),c=>c.charCodeAt(0))};
@@ -1344,9 +1344,20 @@ function sxSaved(){try{const j=JSON.parse(localStorage.getItem('itqan_sx'));if(j
 function secOpen(){
  if(!(window.crypto&&crypto.subtle))return alert('المتصفح لا يدعم التشفير — افتح الصفحة من Chrome/Safari عبر https');
  if(typeof Peer==='undefined')return alert('تعذر تحميل مكتبة الاتصال — تأكد من الإنترنت');
- if(SEC_PIN&&prompt('كلمة مرور السكرتارية')!==SEC_PIN)return;
- role='c';document.body.dataset.role='c';$('#join').hidden=true;$('#sec').hidden=false;sxHome();
+ role='c';document.body.dataset.role='c';$('#join').hidden=true;$('#sec').hidden=false;
+ let ok=0;try{ok=sessionStorage.getItem('itqan_su')===SEC_HASH}catch(e){}
+ ok?sxHome():sxLogin();
 }
+let sxFail=0;
+function sxLogin(){$('#sxst').textContent='🔒';$('#sxB').innerHTML='';
+ $('#sxA').innerHTML='<h3>🔐 دخول السكرتارية</h3><input id="sxpw" type="password" placeholder="كلمة السر" autocomplete="current-password" onkeydown="if(event.key==\'Enter\')sxAuth()"><div id="sxpe" style="color:#fca5a5;min-height:20px"></div><button class="sxb g" id="sxpb" onclick="sxAuth()">دخول</button><button class="sxb d" onclick="location.reload()">رجوع</button>';
+ setTimeout(()=>{const i=$('#sxpw');i&&i.focus()},50)}
+async function sxAuth(){const i=$('#sxpw'),b=$('#sxpb');if(!i||!i.value)return;b.disabled=true;
+ let h='';try{const k=await crypto.subtle.importKey('raw',enc(i.value),'PBKDF2',false,['deriveBits']);
+  h=[...new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:enc('itqan-sec-v1'),iterations:200000},k,256))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){}
+ if(h&&h===SEC_HASH){sxFail=0;try{sessionStorage.setItem('itqan_su',SEC_HASH)}catch(e){}sxHome();return}
+ sxFail++;i.value='';$('#sxpe').textContent='كلمة السر غير صحيحة'+(sxFail>2?' — انتظر '+Math.min(sxFail*3,30)+' ثانية':'');
+ setTimeout(()=>{b.disabled=false;i.focus()},sxFail>2?Math.min(sxFail*3,30)*1000:600)}
 function sxHome(){const s=sxSaved();
  $('#sxst').textContent='';
  $('#sxA').innerHTML='<h3>➕ جلسة جديدة</h3><input id="sxn" placeholder="اسم الحصة / المادة (اختياري)"><input id="sxt" placeholder="اسم المعلم (اختياري)"><button class="sxb g" onclick="sxNew()">إنشاء الجلسة وتوليد الروابط</button>'+
